@@ -208,7 +208,7 @@ export class PlayerService {
   height: this.coerceNumber(playerData.height),
   weight: this.coerceNumber(playerData.weight),
   dateOfBirth: (playerData.dateOfBirth || playerData.DOB || '') as string,
-      avatar: playerData.avatar || '',
+      avatar: playerData.avatar || 'assets/images/default-avatar.svg',
   notes: (playerData.notes || playerData.note || '') as string,
       videoUrl: (playerData as Record<string, unknown>).videoUrl as string || '', // Video URL for player highlights
       

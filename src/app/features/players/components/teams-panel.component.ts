@@ -1,7 +1,7 @@
-import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DragDropModule, CdkDragDrop } from '@angular/cdk/drag-drop';
-import { Player } from '../player-utils';
+import { Player, calculateAge } from '../player-utils';
 
 @Component({
   selector: 'app-teams-panel',
@@ -20,6 +20,7 @@ import { Player } from '../player-utils';
               🔵 Đội Xanh
               <span class="count-badge" [attr.aria-label]="'Số cầu thủ đội xanh: ' + teamA.length">{{teamA.length}}</span>
               <span class="strength-badge" title="Sức mạnh tương đối">⚡ {{ teamStrength(teamA) }}</span>
+              <span class="age-badge" title="Trung bình độ tuổi" *ngIf="teamA.length > 0">🎂 {{ getTeamAverageAge() }} tuổi</span>
             </h3>
           </div>
           <div class="team-content">
@@ -28,8 +29,9 @@ import { Player } from '../player-utils';
               <div class="placeholder" *ngIf="!teamA.length">Kéo cầu thủ vào đây</div>
               <div *ngFor="let player of teamA; trackBy: trackByPlayerId" cdkDrag class="player-card team-member" [attr.aria-label]="player.firstName">
                 <div class="drag-handle" cdkDragHandle title="Kéo để chuyển đội" aria-label="Kéo để chuyển đội">⋮⋮</div>
-                <img [src]="player.avatar || 'assets/images/default-avatar.svg'" (error)="onAvatarError($event)" class="player-avatar" [alt]="player.firstName" loading="lazy" />
+                <img [src]="player.avatar || 'assets/images/default-avatar.svg'" (error)="onAvatarError($event)" class="player-avatar" [alt]="player.firstName" [title]="'Avatar: ' + (player.avatar || 'NO AVATAR')" loading="lazy" />
                 <span class="player-name">{{player.firstName}}</span>
+                <span style="font-size: 0.7rem; color: #666; font-weight: 600;">{{getPlayerAge(player)}} tuổi</span>
               </div>
             </div>
           </div>
@@ -40,6 +42,7 @@ import { Player } from '../player-utils';
               🟠 Đội Cam
               <span class="count-badge" [attr.aria-label]="'Số cầu thủ đội cam: ' + teamB.length">{{teamB.length}}</span>
               <span class="strength-badge" title="Sức mạnh tương đối">⚡ {{ teamStrength(teamB) }}</span>
+              <span class="age-badge" title="Trung bình độ tuổi" *ngIf="teamB.length > 0">🎂 {{ getTeamBAverageAge() }} tuổi</span>
             </h3>
           </div>
           <div class="team-content">
@@ -48,8 +51,9 @@ import { Player } from '../player-utils';
               <div class="placeholder" *ngIf="!teamB.length">Kéo cầu thủ vào đây</div>
               <div *ngFor="let player of teamB; trackBy: trackByPlayerId" cdkDrag class="player-card team-member" [attr.aria-label]="player.firstName">
                 <div class="drag-handle" cdkDragHandle title="Kéo để chuyển đội" aria-label="Kéo để chuyển đội">⋮⋮</div>
-                <img [src]="player.avatar || 'assets/images/default-avatar.svg'" (error)="onAvatarError($event)" class="player-avatar" [alt]="player.firstName" loading="lazy" />
+                <img [src]="player.avatar || 'assets/images/default-avatar.svg'" (error)="onAvatarError($event)" class="player-avatar" [alt]="player.firstName" [title]="'Avatar: ' + (player.avatar || 'NO AVATAR')" loading="lazy" />
                 <span class="player-name">{{player.firstName}}</span>
+                <span style="font-size: 0.7rem; color: #666; font-weight: 600;">{{getPlayerAge(player)}} tuổi</span>
               </div>
             </div>
           </div>
@@ -64,6 +68,7 @@ import { Player } from '../player-utils';
     .team-header h3 { margin:0; font-size:1rem; display:flex; align-items:center; gap:8px; font-weight:600; }
     .count-badge { background:#fff; color:#222; padding:2px 8px; border-radius:16px; font-size:.7rem; font-weight:600; box-shadow:0 2px 4px rgba(0,0,0,.25); }
     .strength-badge { background:rgba(255,255,255,.18); color:#fff; padding:2px 8px; border-radius:14px; font-size:.7rem; font-weight:500; backdrop-filter:blur(2px); }
+    .age-badge { background:rgba(255,255,255,.22); color:#fff; padding:2px 8px; border-radius:14px; font-size:.7rem; font-weight:500; backdrop-filter:blur(2px); margin-left:4px; display:inline-flex; align-items:center; gap:2px; }
   .right-meta { display:flex; align-items:center; gap:6px; font-size:.65rem; }
   .score-label { font-weight:600; font-size:.65rem; }
   .score-input { width:46px; padding:2px 4px; border-radius:6px; border:1px solid rgba(255,255,255,.4); background:rgba(255,255,255,.18); color:#fff; font-size:.7rem; }
@@ -110,8 +115,28 @@ import { Player } from '../player-utils';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TeamsPanelComponent {
-  @Input() teamA: Player[] = [];
-  @Input() teamB: Player[] = [];
+  private cdr = inject(ChangeDetectorRef);
+
+  @Input() set teamA(value: Player[]) {
+    this._teamA = value;
+    console.log('🔵 TeamA updated:', value.length, 'players', value.map(p => `${p.firstName} (${p.position}) avatar:${p.avatar||'MISSING'}`));
+    this.cdr.markForCheck();
+  }
+  get teamA(): Player[] {
+    return this._teamA;
+  }
+  private _teamA: Player[] = [];
+
+  @Input() set teamB(value: Player[]) {
+    this._teamB = value;
+    console.log('🟠 TeamB updated:', value.length, 'players', value.map(p => `${p.firstName} (${p.position}) avatar:${p.avatar||'MISSING'}`));
+    this.cdr.markForCheck();
+  }
+  get teamB(): Player[] {
+    return this._teamB;
+  }
+  private _teamB: Player[] = [];
+
   @Input() scoreA = 0;
   @Input() scoreB = 0;
   // Structured event inputs (provided by parent PlayersComponent)
@@ -127,8 +152,26 @@ export class TeamsPanelComponent {
   @Output() removePlayer = new EventEmitter<{player: Player; team: 'A'|'B'}>();
   @Output() teamDrop = new EventEmitter<CdkDragDrop<Player[]>>();
 
-  trackByPlayerId = (_:number, p:Player)=>p.id;
-  onAvatarError(event:Event){ (event.target as HTMLImageElement).src='assets/images/default-avatar.svg'; }
+  getPlayerAge(player: Player): number | string {
+    if (!player || !player.DOB) return '?';
+    const age = calculateAge(player.DOB);
+    return age !== null && age > 0 ? age : '?';
+  }
+  
+  
+  onAvatarError(event:Event){ 
+    const img = event.target as HTMLImageElement;
+    const currentSrc = img.src;
+    // Prevent infinite loop
+    if (currentSrc.includes('data:image/svg+xml')) {
+      console.warn('⚠️ Avatar chain fallback detected for player:', img.alt);
+      return;
+    }
+    // Use SVG placeholder as fallback
+    img.src = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Crect width=%22200%22 height=%22200%22 fill=%22%23e0dcf5%22/%3E%3Ccircle cx=%22100%22 cy=%2260%22 r=%2235%22 fill=%22%23a89bc8%22/%3E%3Cpath d=%22M 60 120 Q 100 100 140 120 L 140 200 L 60 200 Z%22 fill=%22%23a89bc8%22/%3E%3C/svg%3E';
+    console.log('⚠️ Avatar failed to load from:', currentSrc, '→ using SVG placeholder for', img.alt);
+  }
+  
   dropped(event:CdkDragDrop<Player[]>) { this.teamDrop.emit(event); }
   teamStrength(players:Player[]): number {
     if(!players || !players.length) return 0;
@@ -137,11 +180,42 @@ export class TeamsPanelComponent {
     return Math.round(total/players.length);
   }
   balanceScore(): number {
-    if(!this.teamA.length || !this.teamB.length) return 0;
-    const a=this.teamStrength(this.teamA); const b=this.teamStrength(this.teamB);
+    if(!this._teamA.length || !this._teamB.length) return 0;
+    const a=this.teamStrength(this._teamA); const b=this.teamStrength(this._teamB);
     const diff=Math.abs(a-b);
     return Math.max(0, 100 - Math.min(100,diff*5));
   }
+
+  getTeamAverageAge(): number | string {
+    if (!this._teamA || this._teamA.length === 0) return '?';
+    let totalAge = 0;
+    let validCount = 0;
+    for (const player of this._teamA) {
+      const age = calculateAge(player.DOB);
+      if (age !== null && age > 0) {
+        totalAge += age;
+        validCount++;
+      }
+    }
+    if (validCount === 0) return '?';
+    return Math.round((totalAge / validCount) * 10) / 10;
+  }
+
+  getTeamBAverageAge(): number | string {
+    if (!this._teamB || this._teamB.length === 0) return '?';
+    let totalAge = 0;
+    let validCount = 0;
+    for (const player of this._teamB) {
+      const age = calculateAge(player.DOB);
+      if (age !== null && age > 0) {
+        totalAge += age;
+        validCount++;
+      }
+    }
+    if (validCount === 0) return '?';
+    return Math.round((totalAge / validCount) * 10) / 10;
+  }
+  
   // Derived counters from structured arrays
   get goalsCountA(){ return this.goalsA.length; }
   get goalsCountB(){ return this.goalsB.length; }

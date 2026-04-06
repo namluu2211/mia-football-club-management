@@ -16,3 +16,4 @@ scripts/firebase-rules.json
 
 # Environment files (never commit these!)
 .env.*
+.ENVIRONMENT.md
