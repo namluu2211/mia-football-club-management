@@ -28,7 +28,7 @@
       <div class="toolbar-right">
   <!-- Allow viewers to shuffle teams (read-only action) -->
   <button class="tl-btn" (click)="shuffleRegisteredTeams()" [disabled]="(registeredPlayers.length<2 && allPlayers.length<2)" [title]="(registeredPlayers.length<2 && allPlayers.length>=2) ? 'Sử dụng toàn bộ danh sách vì chưa có đăng ký' : ( (registeredPlayers.length<2 && allPlayers.length<2) ? 'Cần ≥2 cầu thủ' : 'Chia đội ngẫu nhiên')"><i class="fas fa-shuffle"></i> Chia ngẫu nhiên</button>
-  <button class="tl-btn" (click)="balanceTeamsByPosition()" [disabled]="(registeredPlayers.length<2 && allPlayers.length<2)" [title]="(registeredPlayers.length<2 && allPlayers.length>=2) ? 'Sử dụng toàn bộ danh sách' : ( (registeredPlayers.length<2 && allPlayers.length<2) ? 'Cần ≥2 cầu thủ' : 'Chia đội dựa trên vị trí và kỹ năng')"><i class="fas fa-users-cog"></i> Chia theo vị trí</button>
+  <button class="tl-btn" (click)="balanceTeamsByPosition()" [disabled]="(registeredPlayers.length<2 && allPlayers.length<2)" [title]="(registeredPlayers.length<2 && allPlayers.length>=2) ? 'Sử dụng toàn bộ danh sách' : ( (registeredPlayers.length<2 && allPlayers.length<2) ? 'Cần ≥2 cầu thủ' : 'Chia đội dựa trên vị trí có cân bằng độ tuổi')"><i class="fas fa-users-cog"></i> Chia theo vị trí & tuổi</button>
   <button class="tl-btn" (click)="clearTeams()" [disabled]="(!teamA.length && !teamB.length)" appDisableUnlessCanEdit title="Xóa đội hình"><i class="fas fa-rotate-left"></i></button>
       <button class="tl-btn" (click)="runAIAnalysis()" [disabled]="!teamA.length || !teamB.length" title="Phân tích đội hình"><i class="fas fa-robot"></i> AI</button>
   <!-- Allow viewers to run AI analysis (read-only) -->
@@ -74,6 +74,8 @@
         ></app-player-list>
       </div>
     </section>
+
+
 
     <app-teams-panel
       [teamA]="teamA"

@@ -1,4 +1,4 @@
-import { setupZoneTestEnv } from 'jest-preset-angular/setup-env/zone';
+const { setupZoneTestEnv } = require('jest-preset-angular/setup-env/zone');
 setupZoneTestEnv();
 
 // Optional: silence noisy console output in tests
@@ -7,3 +7,4 @@ console.warn = (...args: unknown[]) => {
   if (typeof args[0] === 'string' && args[0].includes('Angular is running in development mode')) return;
   originalWarn(...args);
 };
+ 

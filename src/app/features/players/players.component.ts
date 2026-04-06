@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Subject, Subscription } from 'rxjs';
 import { AIWorkerService } from './services/ai-worker.service';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
-import { Player, dividePlayersByPosition } from './player-utils'; 
+import { Player, dividePlayersByPosition, dividePlayersByPositionWithAgeBalance } from './player-utils'; 
 import { PlayerInfo } from '../../core/models/player.model';
 import { TeamComposition, TeamColor, MatchStatus, MatchInfo, MatchResult, MatchFinances, ExpenseBreakdown, RevenueBreakdown, MatchStatistics, GoalType, CardType, MatchEvent, EventType } from '../../core/models/match.model';
 import type { AIAnalysisResult } from './services/ai-analysis.service';
@@ -218,6 +218,7 @@ export class PlayersComponent implements OnInit, OnDestroy {
               avatar: String(p.avatar||'assets/images/default-avatar.svg'),
               note: String(p.note||'')
             }));
+            console.log('✅ Loaded', this.allPlayers.length, 'players from players.json with avatars:', this.allPlayers.slice(0,3).map(p => ({ firstName: p.firstName, avatar: p.avatar })));
           }
         }
       }
@@ -397,7 +398,21 @@ export class PlayersComponent implements OnInit, OnDestroy {
   }
 
   balanceTeamsByPosition() {
-    const basePool = this.registeredPlayers.length >= 2 ? this.registeredPlayers : this.allPlayers;
+    let basePool = this.registeredPlayers.length >= 2 ? this.registeredPlayers : this.allPlayers;
+    
+    // Ensure basePool has all avatar data from allPlayers by merging
+    if (basePool.length > 0 && this.allPlayers.length > 0) {
+      basePool = basePool.map(p => {
+        // Try to find matching player in allPlayers
+        const enrichedPlayer = this.allPlayers.find(ap => ap.id === p.id || (ap.firstName === p.firstName && ap.lastName === p.lastName));
+        if (enrichedPlayer && enrichedPlayer.avatar && (!p.avatar || p.avatar === 'assets/images/default-avatar.svg')) {
+          console.log(`📦 Enriching ${p.firstName} with avatar: ${enrichedPlayer.avatar}`);
+          return { ...p, avatar: enrichedPlayer.avatar };
+        }
+        return p;
+      });
+      console.log('📋 BasePool enriched with avatars from allPlayers:', basePool.slice(0, 2).map(p => ({ firstName: p.firstName, avatar: p.avatar })));
+    }
     
     if (basePool.length < 2) {
       this.matchSaveMessage = 'Cần ≥2 cầu thủ để chia đội';
@@ -433,122 +448,27 @@ export class PlayersComponent implements OnInit, OnDestroy {
     });
 
     
-    if (missingPlayers.length > 0) {
-      missingPlayers.forEach((id, i) => {
-        const missingPlayer = basePool.find(p => (p.coreId || `player_${p.id}`) === id);
-        if (missingPlayer) {
-          console.log(`  MISSING ${i+1}. ${missingPlayer.firstName} ${missingPlayer.lastName || ''} - Position: "${missingPlayer.position}" - ID: ${missingPlayer.id} - CoreId: ${missingPlayer.coreId}`);
-        } else {
-          console.log(`  MISSING ${i+1}. Player with ID: ${id} not found in basePool`);
-        }
-      });
-      
-      // Use simple position-based division for all players
-      const division = dividePlayersByPosition(basePool as Player[]);
-      this.teamA = division.teamA as PlayerWithCoreId[];
-      this.teamB = division.teamB as PlayerWithCoreId[];
-      
-      this.matchSaveMessage = `✅ Đã chia đội theo vị trí (${this.teamA.length} vs ${this.teamB.length})`;
-      
-      setTimeout(() => { 
-        this.matchSaveMessage = ''; 
-        this.cdr.markForCheck(); 
-      }, 4000);
+    // ⭐ ALWAYS use position-based division with age balance
+    console.log('📋 Using dividePlayersByPositionWithAgeBalance for all', basePool.length, 'players');
+    const division = dividePlayersByPositionWithAgeBalance(basePool as Player[]);
+    this.teamA = (division.teamA as Player[]).map(p => ({
+      ...p,
+      coreId: p.id ? `player_${p.id}` : undefined
+    })) as PlayerWithCoreId[];
+    this.teamB = (division.teamB as Player[]).map(p => ({
+      ...p,
+      coreId: p.id ? `player_${p.id}` : undefined
+    })) as PlayerWithCoreId[];
 
-      this.triggerTeamChange();
-      this.persistTeams();
-      this.cdr.markForCheck();
-      return;
-    }
+    console.log('✅ TeamA after division:', this.teamA.slice(0, 3).map(p => ({ firstName: p.firstName, position: p.position, avatar: p.avatar })));
+    console.log('✅ TeamB after division:', this.teamB.slice(0, 3).map(p => ({ firstName: p.firstName, position: p.position, avatar: p.avatar })));
     
-    if (playerIds.length === 0) {
-      this.matchSaveMessage = 'Không tìm thấy ID cầu thủ';
-      setTimeout(() => { 
-        this.matchSaveMessage = ''; 
-        this.cdr.markForCheck(); 
-      }, 2500);
-      return;
-    }
-
-    // Use the position-based balancing from PlayerService (now with randomization)
-    const result = this.simplePlayerService.balanceTeamsByPosition(playerIds);
-
-    console.log('📊 Balance result:', {
-      success: result.success,
-      teamACount: result.teamADetails.length,
-      teamBCount: result.teamBDetails.length,
-      sampleTeamAPlayer: result.teamADetails[0],
-      sampleTeamBPlayer: result.teamBDetails[0]
-    });
-
-    if (!result.success) {
-      this.matchSaveMessage = result.message;
-      setTimeout(() => { 
-        this.matchSaveMessage = ''; 
-        this.cdr.markForCheck(); 
-      }, 3000);
-      return;
-    }
-
-    this.teamA = result.teamA.map(resultId => {
-      // Strategy 1: Try to find by various ID matches
-      const  originalPlayer = basePool.find(p => {
-        return p.coreId === resultId || String(p.id) === String(resultId) || `player_${p.id}` === resultId;
-      });
-      
-      if (originalPlayer) {
-        return originalPlayer;
-      }
-      
-      // Strategy 2: Fallback - convert from PlayerInfo
-      const playerInfo = result.teamADetails.find(p => p.id === resultId);
-      if (playerInfo) {
-        return this.convertPlayerInfoToPlayer(playerInfo);
-      }
-      
-      // Strategy 3: Last resort - find by name in teamADetails and basePool
-      const playerInfoByName = result.teamADetails.find(p => 
-        basePool.some(bp => bp.firstName === p.firstName && (bp.lastName || '') === (p.lastName || ''))
-      );
-      if (playerInfoByName) {
-        const basePlayer = basePool.find(bp => 
-          bp.firstName === playerInfoByName.firstName && (bp.lastName || '') === (playerInfoByName.lastName || '')
-        );
-        return basePlayer || this.convertPlayerInfoToPlayer(playerInfoByName);
-      }
-      
-      return null;
-    }).filter(Boolean) as PlayerWithCoreId[];
-
-    this.teamB = result.teamB.map(resultId => {
-      // Strategy 1: Try to find by various ID matches
-      const originalPlayer = basePool.find(p => {
-        return p.coreId === resultId || String(p.id) === String(resultId) || `player_${p.id}` === resultId;
-      });
-      
-      if (originalPlayer) {
-        return originalPlayer;
-      }
-      
-      // Strategy 2: Fallback - convert from PlayerInfo
-      const playerInfo = result.teamBDetails.find(p => p.id === resultId);
-      if (playerInfo) {
-        return this.convertPlayerInfoToPlayer(playerInfo);
-      }
-      
-      // Strategy 3: Last resort - find by name in teamBDetails and basePool
-      const playerInfoByName = result.teamBDetails.find(p => 
-        basePool.some(bp => bp.firstName === p.firstName && (bp.lastName || '') === (p.lastName || ''))
-      );
-      if (playerInfoByName) {
-        const basePlayer = basePool.find(bp => 
-          bp.firstName === playerInfoByName.firstName && (bp.lastName || '') === (playerInfoByName.lastName || '')
-        );
-        return basePlayer || this.convertPlayerInfoToPlayer(playerInfoByName);
-      }
-      
-      return null;
-    }).filter(Boolean) as PlayerWithCoreId[];
+    this.matchSaveMessage = `✅ Đã chia đội theo vị trí & cân bằng tuổi (${this.teamA.length} vs ${this.teamB.length})`;
+    
+    setTimeout(() => { 
+      this.matchSaveMessage = ''; 
+      this.cdr.markForCheck(); 
+    }, 4000);
 
     // Safety check: if we lost players, ensure all basePool players are included
     const allTeamPlayers = [...this.teamA, ...this.teamB];
@@ -569,23 +489,35 @@ export class PlayersComponent implements OnInit, OnDestroy {
       });
       console.log(`✅ Added missing players. Final counts - Team A: ${this.teamA.length}, Team B: ${this.teamB.length}`);
     }
+    
+    // Final pass: Ensure all players have avatars (enriching from allPlayers if needed)
+    this.teamA = this.teamA.map(p => {
+      if (!p.avatar || p.avatar === 'assets/images/default-avatar.svg') {
+        const enriched = this.allPlayers.find(ap => ap.id === p.id || ap.firstName === p.firstName);
+        if (enriched && enriched.avatar) {
+          console.log(`🎯 Final enrichment for TeamA ${p.firstName}: ${enriched.avatar}`);
+          return { ...p, avatar: enriched.avatar };
+        }
+      }
+      return p;
+    });
+    
+    this.teamB = this.teamB.map(p => {
+      if (!p.avatar || p.avatar === 'assets/images/default-avatar.svg') {
+        const enriched = this.allPlayers.find(ap => ap.id === p.id || ap.firstName === p.firstName);
+        if (enriched && enriched.avatar) {
+          console.log(`🎯 Final enrichment for TeamB ${p.firstName}: ${enriched.avatar}`);
+          return { ...p, avatar: enriched.avatar };
+        }
+      }
+      return p;
+    });
+    
+    console.log('✅ Final TeamA with avatars:', this.teamA.map(p => ({ firstName: p.firstName, avatar: p.avatar })));
+    console.log('✅ Final TeamB with avatars:', this.teamB.map(p => ({ firstName: p.firstName, avatar: p.avatar })));
 
     console.log('👥 Team A mapped:', this.teamA.length, 'players', this.teamA.map(p => `${p.firstName} (ID: ${p.id})`));
     console.log('👥 Team B mapped:', this.teamB.length, 'players', this.teamB.map(p => `${p.firstName} (ID: ${p.id})`));
-
-    // Show success message with score
-    this.matchSaveMessage = `✅ ${result.message} - Điểm cân bằng: ${result.overallScore}/100`;
-    console.log('📊 Team balance results:', result);
-    console.log('📋 Recommendations:', result.recommendations);
-
-    // Log position distribution
-    console.log('👥 Team A positions:', result.teamAPositions);
-    console.log('👥 Team B positions:', result.teamBPositions);
-
-    setTimeout(() => { 
-      this.matchSaveMessage = ''; 
-      this.cdr.markForCheck(); 
-    }, 4000);
 
     this.triggerTeamChange();
     this.persistTeams(); // Save the balanced teams to localStorage
@@ -606,7 +538,7 @@ export class PlayersComponent implements OnInit, OnDestroy {
       DOB: playerInfo.dateOfBirth ? new Date(playerInfo.dateOfBirth).getFullYear() : 0,
       height: playerInfo.height || 0,
       weight: playerInfo.weight || 0,
-      avatar: playerInfo.avatar,
+      avatar: playerInfo.avatar || 'assets/images/default-avatar.svg',
       note: playerInfo.notes
     };
 

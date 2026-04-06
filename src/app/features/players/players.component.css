@@ -1164,3 +1164,10 @@ app-teams-panel .delete-btn:hover {
    app-teams-panel .team-players { padding:8px; }
    app-teams-panel .team-member { padding:5px 6px; }
 }
+
+/* Team Formation By Position Section */
+.formation-section {
+   margin-top: 32px;
+   animation: fadeInUp 1s ease 0.5s both;
+}
+
