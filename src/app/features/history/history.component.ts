@@ -6,7 +6,6 @@ import { FormsModule } from '@angular/forms';
 import { PermissionService } from '../../core/services/permission.service';
 import { CanEditDirective } from '../../shared/can-edit.directive';
 import { FirebaseAuthService } from '../../services/firebase-auth.service';
-import { DevFirebaseAuthService } from '../../services/dev-firebase-auth.service';
 import { Router } from '@angular/router';
 
 @Component({
@@ -2047,7 +2046,6 @@ export class HistoryComponent implements OnInit, OnDestroy {
   private firebaseService = inject(FirebaseService);
   private dataStore = inject(DataStoreService);
   private firebaseAuth = inject(FirebaseAuthService);
-  private devAuth = inject(DevFirebaseAuthService);
   private router = inject(Router);
   private permission = inject(PermissionService);
   

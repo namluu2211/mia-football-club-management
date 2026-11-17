@@ -31,6 +31,8 @@
     "lint": "ng lint",
     "deploy:firebase": "npm run build && firebase deploy --only hosting:mia-fc-management",
     "firebase:rules": "node scripts/generate-firebase-rules.js",
+    "firebase:rules:check": "node scripts/generate-firebase-rules.js --check",
+    "deploy:rules": "firebase deploy --only database,storage",
     "e2e": "npx playwright install --with-deps && npx playwright test",
     "e2e:dev": "powershell -Command \"Start-Process -FilePath npm -ArgumentList 'run start' ; while(-not (Test-NetConnection -ComputerName 127.0.0.1 -Port 4200 -WarningAction SilentlyContinue).TcpTestSucceeded){ Start-Sleep -Seconds 2 } ; npx playwright install --with-deps ; npx playwright test\"",
     "profile": "node scripts/profile-performance.js"

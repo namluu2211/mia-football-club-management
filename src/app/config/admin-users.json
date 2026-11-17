@@ -1,0 +1,30 @@
+[
+  {
+    "email": "bktientu@gmail.com",
+    "username": "NamLuu",
+    "displayName": "Nam Lưu",
+    "role": "superadmin",
+    "permissions": ["read", "write", "delete", "admin_panel", "user_management"]
+  },
+  {
+    "email": "nguyenthuysy@gmail.com",
+    "username": "SyNguyen",
+    "displayName": "Sy Nguyễn",
+    "role": "admin",
+    "permissions": ["read", "write", "admin_panel"]
+  },
+  {
+    "email": "hanguyen@thanglongfc.com",
+    "username": "HaNguyen",
+    "displayName": "Hà Nguyễn",
+    "role": "admin",
+    "permissions": ["read", "write", "admin_panel"]
+  },
+  {
+    "email": "hieutran@thanglongfc.com",
+    "username": "hieutran",
+    "displayName": "Hiếu Trần",
+    "role": "admin",
+    "permissions": ["read", "write", "admin_panel"]
+  }
+]
