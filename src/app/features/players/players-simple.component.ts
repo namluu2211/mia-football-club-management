@@ -6,8 +6,7 @@ import { Subject, debounceTime, takeUntil } from 'rxjs';
 
 import { PlayerService } from '../../core/services/player.service';
 import { AvatarUploadService } from './services/avatar-upload.service';
-import { ToastService } from '../../shared/toast.service';
-import { ToastContainerComponent } from '../../shared/toast-container.component';
+import { ToastService } from '../../core/services/toast.service';
 import { PlayerInfo, PlayerStatus } from '../../core/models/player.model';
 import { PerformanceService } from '../../services/performance.service';
 import { AssetOptimizationService } from '../../services/asset-optimization.service';
@@ -15,11 +14,10 @@ import { AssetOptimizationService } from '../../services/asset-optimization.serv
 @Component({
   selector: 'app-players-simple',
   standalone: true,
-  imports: [CommonModule, FormsModule, ToastContainerComponent],
+  imports: [CommonModule, FormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="players-container">
-      <app-toast-container></app-toast-container>
       <!-- Header Section -->
       <div class="header-section">
         <div class="title-text">

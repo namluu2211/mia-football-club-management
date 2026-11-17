@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { PerfMarksService } from '../../../core/services/perf-marks.service';
+import { createAiWorker } from './ai-worker.factory';
 import { Observable, of, BehaviorSubject } from 'rxjs';
 import { AIAnalysisService, Player as AIPlayer } from './ai-analysis.service';
 import type { HeadToHeadStats } from './history-stats.service';
@@ -23,16 +24,7 @@ export class AIWorkerService {
   private ensureWorker(){
   if(!this.supportsWorker) return;
     if(!this.worker){
-      // Try multiple resolution strategies for worker path (Angular build can relocate workers)
-      const tryPaths = [
-        './ai-analysis.worker.ts',
-        'ai-analysis.worker.js'
-      ];
-      let created: Worker | null = null;
-      for(const p of tryPaths){
-        try { created = new Worker(p, { type:'module' }); break; } catch { /* continue */ }
-      }
-      this.worker = created;
+      try { this.worker = createAiWorker(); } catch { this.worker = null; /* falls back to main-thread analysis */ }
     }
   }
 

@@ -268,11 +268,9 @@ export function dividePlayersByPositionWithAgeBalance(players: Player[]): TeamDi
 
   console.log(`  Sau: Team A = ${teamA.length}, Team B = ${teamB.length}`);
 
-  // Recalculate ages after balancing
-  teamAAge = 0;
-  teamAValidAges = 0;
-  teamBAge = 0;
-  teamBValidAges = 0;
+  // Calculate ages after balancing
+  let teamAAge = 0, teamAValidAges = 0;
+  let teamBAge = 0, teamBValidAges = 0;
 
   for (const player of teamA) {
     const age = calculateAge(player.DOB);
