@@ -14,7 +14,7 @@ import {
   remove,
   Database
 } from 'firebase/database';
-import { initializeApp, FirebaseApp, getApps, getApp } from 'firebase/app';
+import { initializeApp, FirebaseApp, getApps } from 'firebase/app';
 import { environment } from '../../../environments/environment';
 
 export interface HistoryEntry {

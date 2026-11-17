@@ -43,7 +43,7 @@ export class DisableUnlessCanEditDirective implements OnDestroy {
   }
 
   private applyState(canEdit: boolean) {
-    const native = this.el.nativeElement as any;
+    const native = this.el.nativeElement as HTMLElement;
     const isFormControl = 'disabled' in native;
     if (!canEdit) {
       if (isFormControl) this.rnd.setProperty(native, 'disabled', true);

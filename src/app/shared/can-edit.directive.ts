@@ -2,6 +2,9 @@ import { Directive, TemplateRef, ViewContainerRef, Input, inject, OnDestroy } fr
 import { PermissionService } from '../core/services/permission.service';
 import { Subscription } from 'rxjs';
 
+/** Optional "{ else: templateRef }" argument accepted by the structural directives. */
+type ElseInput = { else?: unknown } | null | undefined;
+
 /**
  * Structural directive *appCanEdit
  * Usage:
@@ -15,15 +18,15 @@ import { Subscription } from 'rxjs';
   standalone: true
 })
 export class CanEditDirective implements OnDestroy {
-  private tpl = inject(TemplateRef<any>);
+  private tpl = inject<TemplateRef<unknown>>(TemplateRef);
   private vcr = inject(ViewContainerRef);
   private permission = inject(PermissionService);
   private sub: Subscription;
   private hasView = false;
-  private elseTpl?: TemplateRef<any>;
+  private elseTpl?: TemplateRef<unknown>;
 
   // Support *appCanEdit="{ else: someRef }"
-  @Input() set appCanEdit(value: any) {
+  @Input() set appCanEdit(value: ElseInput) {
     if (value && value.else instanceof TemplateRef) {
       this.elseTpl = value.else;
     }
@@ -64,14 +67,14 @@ export class CanEditDirective implements OnDestroy {
   standalone: true
 })
 export class CanViewOrEditDirective implements OnDestroy {
-  private tpl = inject(TemplateRef<any>);
+  private tpl = inject<TemplateRef<unknown>>(TemplateRef);
   private vcr = inject(ViewContainerRef);
   private permission = inject(PermissionService);
   private sub: Subscription;
-  private elseTpl?: TemplateRef<any>;
+  private elseTpl?: TemplateRef<unknown>;
   private hasView = false;
 
-  @Input() set appCanViewOrEdit(value: any) {
+  @Input() set appCanViewOrEdit(value: ElseInput) {
     if (value && value.else instanceof TemplateRef) {
       this.elseTpl = value.else;
     }

@@ -207,7 +207,7 @@ import { Router } from '@angular/router';
                       <span class="team-name-short orange">Đội Cam</span>
                     </div>
                     
-                    <div class="match-actions-inline" *appCanEdit (click)="$event.stopPropagation()">
+                    <div class="match-actions-inline" *appCanEdit role="presentation" (click)="$event.stopPropagation()">
                       <button class="action-btn-small edit" (click)="editMatch(match)" title="Chỉnh sửa">
                         <i class="fas fa-edit"></i>
                       </button>

@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
@@ -1003,8 +1003,6 @@ interface MonthlyStats {
       100% {
         transform: rotate(360deg);
       }
-    }
-      z-index: 10;
     }
 
     .enhanced-select:focus + .enhanced-select-arrow {
