@@ -9,20 +9,22 @@ import { ToastService } from '../core/services/toast.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="toast-wrapper" aria-live="polite" aria-atomic="true">
-      <div class="toast" *ngFor="let msg of messages(); trackBy: trackById" [class]="'toast ' + msg.type" role="alert">
-        <div class="icon" aria-hidden="true">
+      @for (msg of messages(); track trackById($index, msg)) {
+        <div class="toast" [class]="'toast ' + msg.type" role="alert">
+          <div class="icon" aria-hidden="true">
           <i [ngClass]="{
             'fas fa-check-circle': msg.type==='success',
             'fas fa-exclamation-circle': msg.type==='error',
             'fas fa-info-circle': msg.type==='info',
             'fas fa-exclamation-triangle': msg.type==='warning'
           }"></i>
+          </div>
+          <div class="text">{{msg.text}}</div>
+          <button type="button" class="close" (click)="dismiss(msg.id)" aria-label="Đóng thông báo">×</button>
         </div>
-        <div class="text">{{msg.text}}</div>
-        <button type="button" class="close" (click)="dismiss(msg.id)" aria-label="Đóng thông báo">×</button>
-      </div>
+      }
     </div>
-  `,
+    `,
   styles: [`
     .toast-wrapper { position: fixed; top: 16px; right: 16px; display:flex; flex-direction:column; gap:12px; z-index:3000; }
     .toast { display:flex; align-items:flex-start; gap:10px; min-width:240px; max-width:360px; padding:12px 16px; border-radius:12px; box-shadow:0 8px 20px -4px rgba(0,0,0,.25); font-size:13px; font-weight:500; line-height:1.3; backdrop-filter:blur(14px) saturate(160%); position:relative; overflow:hidden; animation: slideToast .4s cubic-bezier(.4,0,.2,1); }

@@ -18,9 +18,9 @@ import { BehaviorSubject } from 'rxjs';
     </div>
     <div class="setting-group">
       <span class="setting-label">AI Analysis:</span>
-      <ng-container *ngIf="aiEnabled$ | async as enabled">
+      @if (aiEnabled$ | async; as enabled) {
         <button (click)="toggleAI()" [attr.aria-pressed]="enabled">{{ enabled ? 'Enabled' : 'Disabled' }}</button>
-      </ng-container>
+      }
     </div>
     <div class="setting-group">
       <span class="setting-label">Analytics Export:</span>
@@ -30,7 +30,9 @@ import { BehaviorSubject } from 'rxjs';
       <span class="setting-label">Manual Firebase Sync Flush:</span>
       <button (click)="flushFirebaseBatch()" [disabled]="flushing">{{ flushing? 'Flushing...' : 'Flush Now' }}</button>
     </div>
-    <p class="status" *ngIf="statusMsg">{{ statusMsg }}</p>
+    @if (statusMsg) {
+      <p class="status">{{ statusMsg }}</p>
+    }
   </section>
   `,
   styles: [`

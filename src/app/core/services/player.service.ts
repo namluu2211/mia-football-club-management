@@ -9,7 +9,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 // Firebase imports (guarded by runtime validation)
 import { firebaseApp, isFirebaseConfigValid } from '../../config/firebase.config';
-import { getDatabase, ref, get, set, update, remove } from 'firebase/database';
+import type { Database } from 'firebase/database';
 import { 
   PlayerInfo, 
   PlayerStatus,
@@ -41,8 +41,8 @@ export class PlayerService {
   private readonly _error$ = new BehaviorSubject<string | null>(null);
 
   // Firebase realtime database reference (lazy init)
-  private db = isFirebaseConfigValid && firebaseApp ? getDatabase(firebaseApp) : null;
-  private realtimeEnabled = !!this.db; // Could be enhanced with environment.features.firebaseRealtime
+  private realtimeEnabled = isFirebaseConfigValid && !!firebaseApp; // Could be enhanced with environment.features.firebaseRealtime
+  private rtHandle?: Promise<{ db: Database; api: typeof import('firebase/database') }>;
 
   // Internal flags
   private initialLoadPerformed = false;
@@ -100,11 +100,20 @@ export class PlayerService {
     }
   }
 
+  /** Loads firebase/database on first use so it stays out of the initial bundle. */
+  private realtime(): Promise<{ db: Database; api: typeof import('firebase/database') }> | null {
+    if (!this.realtimeEnabled || !firebaseApp) return null;
+    this.rtHandle ??= import('firebase/database').then(api => ({ api, db: api.getDatabase(firebaseApp as NonNullable<typeof firebaseApp>) }));
+    return this.rtHandle;
+  }
+
   // Load players from Firebase Realtime DB
   private async loadFromRealtime(): Promise<void> {
-    if (!this.db) return;
+    const rt = await this.realtime();
+    if (!rt) return;
+    const { db, api: { ref, get } } = rt;
     try {
-      const playersRef = ref(this.db, 'players');
+      const playersRef = ref(db, 'players');
       const snapshot = await get(playersRef);
       if (snapshot.exists()) {
         const raw = snapshot.val();
@@ -113,7 +122,7 @@ export class PlayerService {
         this.updatePlayersMap(list);
       } else {
         console.log('🌐 /players node empty. Attempting fallback scan for legacy root player_* nodes...');
-        const rootSnap = await get(ref(this.db, '/'));
+        const rootSnap = await get(ref(db, '/'));
         if (rootSnap.exists()) {
           const rootVal = rootSnap.val();
           const fallback: PlayerInfo[] = [];
@@ -298,7 +307,7 @@ export class PlayerService {
       this._players$.next(currentMap);
 
       const persistList = Array.from(currentMap.values()).map(p => this.stripInternalFields(p));
-      if (this.realtimeEnabled && this.db) {
+      if (this.realtimeEnabled) {
         await this.writePlayerRealtime(this.stripInternalFields(newPlayer));
         this.saveToLocalStorage(persistList);
       } else {
@@ -340,7 +349,7 @@ export class PlayerService {
       this._players$.next(currentMap);
 
       const persistList = Array.from(currentMap.values()).map(p => this.stripInternalFields(p));
-      if (this.realtimeEnabled && this.db) {
+      if (this.realtimeEnabled) {
         await this.writePlayerRealtime(this.stripInternalFields(updatedPlayer));
         this.saveToLocalStorage(persistList);
       } else {
@@ -371,7 +380,7 @@ export class PlayerService {
       currentMap.delete(id);
       this._players$.next(currentMap);
 
-      if (this.realtimeEnabled && this.db) {
+      if (this.realtimeEnabled) {
         await this.deletePlayerRealtime(id);
       } else {
         this.saveToLocalStorage(Array.from(currentMap.values()));
@@ -388,12 +397,14 @@ export class PlayerService {
 
   // Realtime helper: write player and avatar metadata node
   private async writePlayerRealtime(player: PlayerInfo) {
-    if (!this.db) return;
-    const playerRef = ref(this.db, `players/${player.id}`);
+    const rt = await this.realtime();
+    if (!rt) return;
+    const { db, api: { ref, set, update } } = rt;
+    const playerRef = ref(db, `players/${player.id}`);
   const payload: PlayerInfo & { avatarURL?: string } = { ...player };
     // Avatar versioning logic: if avatar changed, append new version entry
     if (player.avatar) {
-      const avatarMetaRef = ref(this.db, `playerAvatars/${player.id}`);
+      const avatarMetaRef = ref(db, `playerAvatars/${player.id}`);
       const updatedAt = new Date().toISOString();
       const versionKey = `v${Date.now()}`;
       // Fetch existing to determine currentVersion (optional optimization skipped here for simplicity)
@@ -419,9 +430,11 @@ export class PlayerService {
 
   // Public API to add gallery media metadata (client-side uploads not implemented here)
   async addGalleryMedia(playerId: string, media: { downloadURL: string; fileName?: string; checksum?: string; }): Promise<void> {
-    if (!this.db) return;
+    const rt = await this.realtime();
+    if (!rt) return;
+    const { db, api: { ref, set } } = rt;
     const mediaId = media.checksum || `m_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    const mediaRef = ref(this.db, `playerMedia/${playerId}/${mediaId}`);
+    const mediaRef = ref(db, `playerMedia/${playerId}/${mediaId}`);
     await set(mediaRef, {
       mediaId,
       playerId,
@@ -434,9 +447,11 @@ export class PlayerService {
   }
 
   private async deletePlayerRealtime(id: string) {
-    if (!this.db) return;
-    const playerRef = ref(this.db, `players/${id}`);
-    const avatarRef = ref(this.db, `playerAvatars/${id}`);
+    const rt = await this.realtime();
+    if (!rt) return;
+    const { db, api: { ref, remove } } = rt;
+    const playerRef = ref(db, `players/${id}`);
+    const avatarRef = ref(db, `playerAvatars/${id}`);
     await remove(playerRef);
     await remove(avatarRef); // Safe even if missing
   }

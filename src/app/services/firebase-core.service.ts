@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-// Type-only imports to avoid pulling runtime. Keep minimal database scope.
-// Prefer static imports for reliability; dynamic used only for database methods if possible
+// firebase/app is small and always needed. firebase/database (~130 KB) is loaded on demand in initialize()
+// so it stays out of the initial bundle.
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
-import { getDatabase, ref, push, set, onValue, serverTimestamp, goOffline, goOnline, Database } from 'firebase/database';
+import type { Database } from 'firebase/database';
 
 import { firebaseConfig, isFirebaseConfigValid } from '../config/firebase.config';
 
@@ -58,6 +58,7 @@ export class FirebaseCoreService {
     FirebaseCoreService.initializing = true;
     try {
       console.log('[FirebaseCore] initialize() start. Existing apps:', getApps().length);
+      const { getDatabase, ref, push, set, onValue, serverTimestamp, goOffline, goOnline } = await import('firebase/database');
       const existing = getApps();
       this.app = existing.length ? existing[0] : initializeApp(firebaseConfig);
       console.log('[FirebaseCore] App resolved. Name:', this.app.name);

@@ -8,25 +8,23 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <ng-container *ngIf="error; else mainContent">
+    @if (error) {
       <div class="players-shell-error" role="alert">
         <h3>⚠️ Không tải được module đội hình</h3>
         <p>{{errorMessage}}</p>
         <button type="button" (click)="retry()" class="retry-btn">Thử lại</button>
       </div>
-    </ng-container>
-    <ng-template #mainContent>
-      <ng-container *ngIf="loaded; else loading">
+    } @else {
+      @if (loaded) {
         <ng-container *ngComponentOutlet="playersComponent; inputs: componentInputs"></ng-container>
-      </ng-container>
-      <ng-template #loading>
+      } @else {
         <div class="players-shell-loading">
           <div class="spinner"></div>
           <div>Tải đội hình...</div>
         </div>
-      </ng-template>
-    </ng-template>
-  `,
+      }
+    }
+    `,
   styles:[`
     .players-shell-loading { display:flex; flex-direction:column; align-items:center; padding:24px; color:#444; }
     .spinner { width:32px; height:32px; border:4px solid #ccc; border-top-color:#2196f3; border-radius:50%; animation:spin 0.8s linear infinite; margin-bottom:12px; }

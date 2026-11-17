@@ -1,12 +1,14 @@
 <!-- Extracted template from players.component.ts (partial) -->
 <div class="modern-container">
   <div class="players-orchestrator">
-    <div class="analyzing-overlay" *ngIf="isAnalyzing">
-      <div style="display:flex; flex-direction:column; align-items:center;">
-  <div class="spinner" role="status" aria-label="Đang phân tích đội hình"></div>
-        <div class="label">Đang phân tích đội hình...</div>
+    @if (isAnalyzing) {
+      <div class="analyzing-overlay">
+        <div style="display:flex; flex-direction:column; align-items:center;">
+          <div class="spinner" role="status" aria-label="Đang phân tích đội hình"></div>
+          <div class="label">Đang phân tích đội hình...</div>
+        </div>
       </div>
-    </div>
+    }
     <!-- Removed duplicate header (now provided by parent Tabs) -->
 
     <section class="players-toolbar" aria-label="Thanh công cụ đội hình">
@@ -15,7 +17,7 @@
           <i class="fas" [class.fa-user-check]="useRegistered" [class.fa-users]="!useRegistered"></i>
           {{ useRegistered ? 'Đăng ký (' + registeredPlayers.length + ')' : 'Tất cả (' + allPlayers.length + ')' }}
         </button>
-  <button class="tl-btn" (click)="toggleRegisteredFilter()" [attr.aria-pressed]="filterRegisteredOnly" title="Chỉ hiển thị cầu thủ đã đăng ký">
+        <button class="tl-btn" (click)="toggleRegisteredFilter()" [attr.aria-pressed]="filterRegisteredOnly" title="Chỉ hiển thị cầu thủ đã đăng ký">
           <i class="fas" [class.fa-filter]="!filterRegisteredOnly" [class.fa-filter-circle-check]="filterRegisteredOnly"></i>
         </button>
         <button class="tl-btn" (click)="clearRegisteredPlayers()" [disabled]="registeredPlayers.length===0" title="Xóa danh sách đăng ký">
@@ -26,13 +28,13 @@
         <span class="mode-indicator">{{ getPlayerModeStatus() }}</span>
       </div>
       <div class="toolbar-right">
-  <!-- Allow viewers to shuffle teams (read-only action) -->
-  <button class="tl-btn" (click)="shuffleRegisteredTeams()" [disabled]="(registeredPlayers.length<2 && allPlayers.length<2)" [title]="(registeredPlayers.length<2 && allPlayers.length>=2) ? 'Sử dụng toàn bộ danh sách vì chưa có đăng ký' : ( (registeredPlayers.length<2 && allPlayers.length<2) ? 'Cần ≥2 cầu thủ' : 'Chia đội ngẫu nhiên')"><i class="fas fa-shuffle"></i> Chia ngẫu nhiên</button>
-  <button class="tl-btn" (click)="balanceTeamsByPosition()" [disabled]="(registeredPlayers.length<2 && allPlayers.length<2)" [title]="(registeredPlayers.length<2 && allPlayers.length>=2) ? 'Sử dụng toàn bộ danh sách' : ( (registeredPlayers.length<2 && allPlayers.length<2) ? 'Cần ≥2 cầu thủ' : 'Chia đội dựa trên vị trí có cân bằng độ tuổi')"><i class="fas fa-users-cog"></i> Chia theo vị trí & tuổi</button>
-  <button class="tl-btn" (click)="clearTeams()" [disabled]="(!teamA.length && !teamB.length)" appDisableUnlessCanEdit title="Xóa đội hình"><i class="fas fa-rotate-left"></i></button>
-      <button class="tl-btn" (click)="runAIAnalysis()" [disabled]="!teamA.length || !teamB.length" title="Phân tích đội hình"><i class="fas fa-robot"></i> AI</button>
-  <!-- Allow viewers to run AI analysis (read-only) -->
-  <button class="tl-btn primary" *appCanEdit (click)="saveMatchInfo()" [disabled]="!teamA.length || !teamB.length" aria-label="Lưu trận đấu" title="Lưu trận đấu"><i class="fas fa-save"></i> Lưu trận đấu</button>
+        <!-- Allow viewers to shuffle teams (read-only action) -->
+        <button class="tl-btn" (click)="shuffleRegisteredTeams()" [disabled]="(registeredPlayers.length<2 && allPlayers.length<2)" [title]="(registeredPlayers.length<2 && allPlayers.length>=2) ? 'Sử dụng toàn bộ danh sách vì chưa có đăng ký' : ( (registeredPlayers.length<2 && allPlayers.length<2) ? 'Cần ≥2 cầu thủ' : 'Chia đội ngẫu nhiên')"><i class="fas fa-shuffle"></i> Chia ngẫu nhiên</button>
+        <button class="tl-btn" (click)="balanceTeamsByPosition()" [disabled]="(registeredPlayers.length<2 && allPlayers.length<2)" [title]="(registeredPlayers.length<2 && allPlayers.length>=2) ? 'Sử dụng toàn bộ danh sách' : ( (registeredPlayers.length<2 && allPlayers.length<2) ? 'Cần ≥2 cầu thủ' : 'Chia đội dựa trên vị trí có cân bằng độ tuổi')"><i class="fas fa-users-cog"></i> Chia theo vị trí & tuổi</button>
+        <button class="tl-btn" (click)="clearTeams()" [disabled]="(!teamA.length && !teamB.length)" appDisableUnlessCanEdit title="Xóa đội hình"><i class="fas fa-rotate-left"></i></button>
+        <button class="tl-btn" (click)="runAIAnalysis()" [disabled]="!teamA.length || !teamB.length" title="Phân tích đội hình"><i class="fas fa-robot"></i> AI</button>
+        <!-- Allow viewers to run AI analysis (read-only) -->
+        <button class="tl-btn primary" *appCanEdit (click)="saveMatchInfo()" [disabled]="!teamA.length || !teamB.length" aria-label="Lưu trận đấu" title="Lưu trận đấu"><i class="fas fa-save"></i> Lưu trận đấu</button>
       </div>
     </section>
 
@@ -44,11 +46,11 @@
           Danh sách cầu thủ
         </h3>
         <button type="button"
-                class="collapse-toggle"
-                (click)="togglePlayerListView()"
-                [attr.aria-expanded]="showPlayerList"
-                [attr.aria-controls]="'playersListContent'"
-                [title]="showPlayerList ? 'Thu gọn danh sách' : 'Mở rộng danh sách'">
+          class="collapse-toggle"
+          (click)="togglePlayerListView()"
+          [attr.aria-expanded]="showPlayerList"
+          [attr.aria-controls]="'playersListContent'"
+          [title]="showPlayerList ? 'Thu gọn danh sách' : 'Mở rộng danh sách'">
           <i class="fas" [class.fa-chevron-up]="showPlayerList" [class.fa-chevron-down]="!showPlayerList"></i>
         </button>
       </header>
@@ -95,159 +97,216 @@
     ></app-teams-panel>
 
     <!-- Match Events Inputs -->
-    <section class="match-events" *ngIf="teamA.length || teamB.length">
-      <h3 class="events-title"><i class="fas fa-clipboard-list me-2"></i>Sự kiện trận đấu</h3>
-  <app-readonly-banner [canEdit]="canEdit"></app-readonly-banner>
-      <div class="events-grid">
-        <!-- Team A Events -->
-        <div class="events-card team-a">
-          <h4>Đội Xanh</h4>
-          <div class="event-group">
-            <h5>Ghi bàn</h5>
-            <div class="inline-form">
-              <select [(ngModel)]="_gaPlayerA" aria-label="Chọn cầu thủ ghi bàn đội A" appDisableUnlessCanEdit>
-                <option [ngValue]="null">Cầu thủ</option>
-                <option *ngFor="let p of teamA" [ngValue]="p.id">{{p.firstName}}</option>
-              </select>
-              <select [(ngModel)]="_gaAssistA" aria-label="Chọn kiến tạo đội A" appDisableUnlessCanEdit>
-                <option [ngValue]="null">Kiến tạo</option>
-                <option *ngFor="let p of teamA" [ngValue]="p.id">{{p.firstName}}</option>
-              </select>
-              <input type="number" min="0" max="120" [(ngModel)]="_gaMinuteA" placeholder="Phút" appDisableUnlessCanEdit />
-              <button (click)="addGoal('A', _gaPlayerA!, _gaMinuteA || 0, _gaAssistA||undefined); _gaPlayerA=null; _gaAssistA=null; _gaMinuteA=null" [disabled]="!_gaPlayerA" appDisableUnlessCanEdit title="Thêm bàn thắng"><i class="fas fa-plus"></i></button>
+    @if (teamA.length || teamB.length) {
+      <section class="match-events">
+        <h3 class="events-title"><i class="fas fa-clipboard-list me-2"></i>Sự kiện trận đấu</h3>
+        <app-readonly-banner [canEdit]="canEdit"></app-readonly-banner>
+        <div class="events-grid">
+          <!-- Team A Events -->
+          <div class="events-card team-a">
+            <h4>Đội Xanh</h4>
+            <div class="event-group">
+              <h5>Ghi bàn</h5>
+              <div class="inline-form">
+                <select [(ngModel)]="_gaPlayerA" aria-label="Chọn cầu thủ ghi bàn đội A" appDisableUnlessCanEdit>
+                  <option [ngValue]="null">Cầu thủ</option>
+                  @for (p of teamA; track p) {
+                    <option [ngValue]="p.id">{{p.firstName}}</option>
+                  }
+                </select>
+                <select [(ngModel)]="_gaAssistA" aria-label="Chọn kiến tạo đội A" appDisableUnlessCanEdit>
+                  <option [ngValue]="null">Kiến tạo</option>
+                  @for (p of teamA; track p) {
+                    <option [ngValue]="p.id">{{p.firstName}}</option>
+                  }
+                </select>
+                <input type="number" min="0" max="120" [(ngModel)]="_gaMinuteA" placeholder="Phút" appDisableUnlessCanEdit />
+                <button (click)="addGoal('A', _gaPlayerA!, _gaMinuteA || 0, _gaAssistA||undefined); _gaPlayerA=null; _gaAssistA=null; _gaMinuteA=null" [disabled]="!_gaPlayerA" appDisableUnlessCanEdit title="Thêm bàn thắng"><i class="fas fa-plus"></i></button>
+              </div>
+              <ul class="event-list">
+                @for (g of goalsA; track g; let i = $index) {
+                  <li>
+                    <span class="badge goal">⚽ {{ getPlayerName(g.playerId) }} @if (g.minute!==undefined) {
+                      <small>({{g.minute}}')</small>
+                      }@if (g.assistId) {
+                      <span> - KT: {{ getPlayerName(g.assistId) }}</span>
+                    }</span>
+                    <button class="remove" *appCanEdit (click)="removeGoal('A',i)">×</button>
+                  </li>
+                }
+              </ul>
             </div>
-            <ul class="event-list">
-              <li *ngFor="let g of goalsA; let i=index">
-                <span class="badge goal">⚽ {{ getPlayerName(g.playerId) }} <small *ngIf="g.minute!==undefined">({{g.minute}}')</small><span *ngIf="g.assistId"> - KT: {{ getPlayerName(g.assistId) }}</span></span>
-                <button class="remove" *appCanEdit (click)="removeGoal('A',i)">×</button>
-              </li>
-            </ul>
+            <div class="event-group">
+              <h5>Phản lưới</h5>
+              <div class="inline-form">
+                <select [(ngModel)]="_ogPlayerA" aria-label="Chọn cầu thủ phản lưới đội A" appDisableUnlessCanEdit>
+                  <option [ngValue]="null">Cầu thủ</option>
+                  @for (p of teamA; track p) {
+                    <option [ngValue]="p.id">{{p.firstName}}</option>
+                  }
+                </select>
+                <input type="number" min="0" max="120" [(ngModel)]="_ogMinuteA" placeholder="Phút" appDisableUnlessCanEdit />
+                <button (click)="addOwnGoal('A', _ogPlayerA!, _ogMinuteA || 0); _ogPlayerA=null; _ogMinuteA=null" [disabled]="!_ogPlayerA" appDisableUnlessCanEdit title="Thêm phản lưới"><i class="fas fa-plus"></i></button>
+              </div>
+              <ul class="event-list">
+                @for (og of ownGoalsA; track og; let i = $index) {
+                  <li>
+                    <span class="badge own-goal">🔴 {{ getPlayerName(og.playerId) }} @if (og.minute!==undefined) {
+                      <small>({{og.minute}}')</small>
+                    }</span>
+                    <button class="remove" *appCanEdit (click)="removeOwnGoal('A',i)">×</button>
+                  </li>
+                }
+              </ul>
+            </div>
+            <div class="event-group">
+              <h5>Thẻ</h5>
+              <div class="inline-form">
+                <select [(ngModel)]="_ycPlayerA" [disabled]="!canEdit">
+                  <option [ngValue]="null">Vàng</option>
+                  @for (p of teamA; track p) {
+                    <option [ngValue]="p.id">{{p.firstName}}</option>
+                  }
+                </select>
+                <input type="number" min="0" max="120" [(ngModel)]="_ycMinuteA" placeholder="Phút" [disabled]="!canEdit" />
+                <button (click)="addCard('yellow','A',_ycPlayerA!, _ycMinuteA||0); _ycPlayerA=null; _ycMinuteA=null" [disabled]="!_ycPlayerA || !canEdit" title="Thêm thẻ vàng"><i class="fas fa-plus"></i></button>
+              </div>
+              <div class="inline-form">
+                <select [(ngModel)]="_rcPlayerA" [disabled]="!canEdit">
+                  <option [ngValue]="null">Đỏ</option>
+                  @for (p of teamA; track p) {
+                    <option [ngValue]="p.id">{{p.firstName}}</option>
+                  }
+                </select>
+                <input type="number" min="0" max="120" [(ngModel)]="_rcMinuteA" placeholder="Phút" [disabled]="!canEdit" />
+                <button (click)="addCard('red','A',_rcPlayerA!, _rcMinuteA||0); _rcPlayerA=null; _rcMinuteA=null" [disabled]="!_rcPlayerA || !canEdit" title="Thêm thẻ đỏ"><i class="fas fa-plus"></i></button>
+              </div>
+              <ul class="event-list">
+                @for (c of yellowCardsA; track c; let yi = $index) {
+                  <li>
+                    <span class="badge yc">🟨 {{ getPlayerName(c.playerId) }} @if (c.minute!==undefined) {
+                      <small>({{c.minute}}')</small>
+                    }</span>
+                    <button class="remove" *appCanEdit (click)="removeCard('yellow','A',yi)">×</button>
+                  </li>
+                }
+                @for (c of redCardsA; track c; let ri = $index) {
+                  <li>
+                    <span class="badge rc">🟥 {{ getPlayerName(c.playerId) }} @if (c.minute!==undefined) {
+                      <small>({{c.minute}}')</small>
+                    }</span>
+                    <button class="remove" *appCanEdit (click)="removeCard('red','A',ri)">×</button>
+                  </li>
+                }
+              </ul>
+            </div>
           </div>
-          <div class="event-group">
-            <h5>Phản lưới</h5>
-            <div class="inline-form">
-              <select [(ngModel)]="_ogPlayerA" aria-label="Chọn cầu thủ phản lưới đội A" appDisableUnlessCanEdit>
-                <option [ngValue]="null">Cầu thủ</option>
-                <option *ngFor="let p of teamA" [ngValue]="p.id">{{p.firstName}}</option>
-              </select>
-              <input type="number" min="0" max="120" [(ngModel)]="_ogMinuteA" placeholder="Phút" appDisableUnlessCanEdit />
-              <button (click)="addOwnGoal('A', _ogPlayerA!, _ogMinuteA || 0); _ogPlayerA=null; _ogMinuteA=null" [disabled]="!_ogPlayerA" appDisableUnlessCanEdit title="Thêm phản lưới"><i class="fas fa-plus"></i></button>
+          <!-- Team B Events -->
+          <div class="events-card team-b">
+            <h4>Đội Cam</h4>
+            <div class="event-group">
+              <h5>Ghi bàn</h5>
+              <div class="inline-form">
+                <select [(ngModel)]="_gaPlayerB" [disabled]="!canEdit">
+                  <option [ngValue]="null">Cầu thủ</option>
+                  @for (p of teamB; track p) {
+                    <option [ngValue]="p.id">{{p.firstName}}</option>
+                  }
+                </select>
+                <select [(ngModel)]="_gaAssistB" [disabled]="!canEdit">
+                  <option [ngValue]="null">Kiến tạo</option>
+                  @for (p of teamB; track p) {
+                    <option [ngValue]="p.id">{{p.firstName}}</option>
+                  }
+                </select>
+                <input type="number" min="0" max="120" [(ngModel)]="_gaMinuteB" placeholder="Phút" [disabled]="!canEdit" />
+                <button (click)="addGoal('B', _gaPlayerB!, _gaMinuteB || 0, _gaAssistB||undefined); _gaPlayerB=null; _gaAssistB=null; _gaMinuteB=null" [disabled]="!_gaPlayerB || !canEdit" title="Thêm bàn thắng"><i class="fas fa-plus"></i></button>
+              </div>
+              <ul class="event-list">
+                @for (g of goalsB; track g; let i = $index) {
+                  <li>
+                    <span class="badge goal">⚽ {{ getPlayerName(g.playerId) }} @if (g.minute!==undefined) {
+                      <small>({{g.minute}}')</small>
+                      }@if (g.assistId) {
+                      <span> - KT: {{ getPlayerName(g.assistId) }}</span>
+                    }</span>
+                    <button class="remove" *appCanEdit (click)="removeGoal('B',i)">×</button>
+                  </li>
+                }
+              </ul>
             </div>
-            <ul class="event-list">
-              <li *ngFor="let og of ownGoalsA; let i=index">
-                <span class="badge own-goal">🔴 {{ getPlayerName(og.playerId) }} <small *ngIf="og.minute!==undefined">({{og.minute}}')</small></span>
-                <button class="remove" *appCanEdit (click)="removeOwnGoal('A',i)">×</button>
-              </li>
-            </ul>
-          </div>
-          <div class="event-group">
-            <h5>Thẻ</h5>
-            <div class="inline-form">
-              <select [(ngModel)]="_ycPlayerA" [disabled]="!canEdit">
-                <option [ngValue]="null">Vàng</option>
-                <option *ngFor="let p of teamA" [ngValue]="p.id">{{p.firstName}}</option>
-              </select>
-              <input type="number" min="0" max="120" [(ngModel)]="_ycMinuteA" placeholder="Phút" [disabled]="!canEdit" />
-              <button (click)="addCard('yellow','A',_ycPlayerA!, _ycMinuteA||0); _ycPlayerA=null; _ycMinuteA=null" [disabled]="!_ycPlayerA || !canEdit" title="Thêm thẻ vàng"><i class="fas fa-plus"></i></button>
+            <div class="event-group">
+              <h5>Phản lưới</h5>
+              <div class="inline-form">
+                <select [(ngModel)]="_ogPlayerB" [disabled]="!canEdit">
+                  <option [ngValue]="null">Cầu thủ</option>
+                  @for (p of teamB; track p) {
+                    <option [ngValue]="p.id">{{p.firstName}}</option>
+                  }
+                </select>
+                <input type="number" min="0" max="120" [(ngModel)]="_ogMinuteB" placeholder="Phút" [disabled]="!canEdit" />
+                <button (click)="addOwnGoal('B', _ogPlayerB!, _ogMinuteB || 0); _ogPlayerB=null; _ogMinuteB=null" [disabled]="!_ogPlayerB || !canEdit" title="Thêm phản lưới"><i class="fas fa-plus"></i></button>
+              </div>
+              <ul class="event-list">
+                @for (og of ownGoalsB; track og; let i = $index) {
+                  <li>
+                    <span class="badge own-goal">🔴 {{ getPlayerName(og.playerId) }} @if (og.minute!==undefined) {
+                      <small>({{og.minute}}')</small>
+                    }</span>
+                    <button class="remove" *appCanEdit (click)="removeOwnGoal('B',i)">×</button>
+                  </li>
+                }
+              </ul>
             </div>
-            <div class="inline-form">
-              <select [(ngModel)]="_rcPlayerA" [disabled]="!canEdit">
-                <option [ngValue]="null">Đỏ</option>
-                <option *ngFor="let p of teamA" [ngValue]="p.id">{{p.firstName}}</option>
-              </select>
-              <input type="number" min="0" max="120" [(ngModel)]="_rcMinuteA" placeholder="Phút" [disabled]="!canEdit" />
-              <button (click)="addCard('red','A',_rcPlayerA!, _rcMinuteA||0); _rcPlayerA=null; _rcMinuteA=null" [disabled]="!_rcPlayerA || !canEdit" title="Thêm thẻ đỏ"><i class="fas fa-plus"></i></button>
+            <div class="event-group">
+              <h5>Thẻ</h5>
+              <div class="inline-form">
+                <select [(ngModel)]="_ycPlayerB" [disabled]="!canEdit">
+                  <option [ngValue]="null">Vàng</option>
+                  @for (p of teamB; track p) {
+                    <option [ngValue]="p.id">{{p.firstName}}</option>
+                  }
+                </select>
+                <input type="number" min="0" max="120" [(ngModel)]="_ycMinuteB" placeholder="Phút" [disabled]="!canEdit" />
+                <button (click)="addCard('yellow','B',_ycPlayerB!, _ycMinuteB||0); _ycPlayerB=null; _ycMinuteB=null" [disabled]="!_ycPlayerB || !canEdit" title="Thêm thẻ vàng"><i class="fas fa-plus"></i></button>
+              </div>
+              <div class="inline-form">
+                <select [(ngModel)]="_rcPlayerB" [disabled]="!canEdit">
+                  <option [ngValue]="null">Đỏ</option>
+                  @for (p of teamB; track p) {
+                    <option [ngValue]="p.id">{{p.firstName}}</option>
+                  }
+                </select>
+                <input type="number" min="0" max="120" [(ngModel)]="_rcMinuteB" placeholder="Phút" [disabled]="!canEdit" />
+                <button (click)="addCard('red','B',_rcPlayerB!, _rcMinuteB||0); _rcPlayerB=null; _rcMinuteB=null" [disabled]="!_rcPlayerB || !canEdit" title="Thêm thẻ đỏ"><i class="fas fa-plus"></i></button>
+              </div>
+              <ul class="event-list">
+                @for (c of yellowCardsB; track c; let yi = $index) {
+                  <li>
+                    <span class="badge yc">🟨 {{ getPlayerName(c.playerId) }} @if (c.minute!==undefined) {
+                      <small>({{c.minute}}')</small>
+                    }</span>
+                    <button class="remove" *appCanEdit (click)="removeCard('yellow','B',yi)">×</button>
+                  </li>
+                }
+                @for (c of redCardsB; track c; let ri = $index) {
+                  <li>
+                    <span class="badge rc">🟥 {{ getPlayerName(c.playerId) }} @if (c.minute!==undefined) {
+                      <small>({{c.minute}}')</small>
+                    }</span>
+                    <button class="remove" *appCanEdit (click)="removeCard('red','B',ri)">×</button>
+                  </li>
+                }
+              </ul>
             </div>
-            <ul class="event-list">
-              <li *ngFor="let c of yellowCardsA; let yi=index">
-                <span class="badge yc">🟨 {{ getPlayerName(c.playerId) }} <small *ngIf="c.minute!==undefined">({{c.minute}}')</small></span>
-                <button class="remove" *appCanEdit (click)="removeCard('yellow','A',yi)">×</button>
-              </li>
-              <li *ngFor="let c of redCardsA; let ri=index">
-                <span class="badge rc">🟥 {{ getPlayerName(c.playerId) }} <small *ngIf="c.minute!==undefined">({{c.minute}}')</small></span>
-                <button class="remove" *appCanEdit (click)="removeCard('red','A',ri)">×</button>
-              </li>
-            </ul>
           </div>
         </div>
-        <!-- Team B Events -->
-        <div class="events-card team-b">
-          <h4>Đội Cam</h4>
-          <div class="event-group">
-            <h5>Ghi bàn</h5>
-            <div class="inline-form">
-              <select [(ngModel)]="_gaPlayerB" [disabled]="!canEdit">
-                <option [ngValue]="null">Cầu thủ</option>
-                <option *ngFor="let p of teamB" [ngValue]="p.id">{{p.firstName}}</option>
-              </select>
-              <select [(ngModel)]="_gaAssistB" [disabled]="!canEdit">
-                <option [ngValue]="null">Kiến tạo</option>
-                <option *ngFor="let p of teamB" [ngValue]="p.id">{{p.firstName}}</option>
-              </select>
-              <input type="number" min="0" max="120" [(ngModel)]="_gaMinuteB" placeholder="Phút" [disabled]="!canEdit" />
-              <button (click)="addGoal('B', _gaPlayerB!, _gaMinuteB || 0, _gaAssistB||undefined); _gaPlayerB=null; _gaAssistB=null; _gaMinuteB=null" [disabled]="!_gaPlayerB || !canEdit" title="Thêm bàn thắng"><i class="fas fa-plus"></i></button>
-            </div>
-            <ul class="event-list">
-              <li *ngFor="let g of goalsB; let i=index">
-                <span class="badge goal">⚽ {{ getPlayerName(g.playerId) }} <small *ngIf="g.minute!==undefined">({{g.minute}}')</small><span *ngIf="g.assistId"> - KT: {{ getPlayerName(g.assistId) }}</span></span>
-                <button class="remove" *appCanEdit (click)="removeGoal('B',i)">×</button>
-              </li>
-            </ul>
-          </div>
-          <div class="event-group">
-            <h5>Phản lưới</h5>
-            <div class="inline-form">
-              <select [(ngModel)]="_ogPlayerB" [disabled]="!canEdit">
-                <option [ngValue]="null">Cầu thủ</option>
-                <option *ngFor="let p of teamB" [ngValue]="p.id">{{p.firstName}}</option>
-              </select>
-              <input type="number" min="0" max="120" [(ngModel)]="_ogMinuteB" placeholder="Phút" [disabled]="!canEdit" />
-              <button (click)="addOwnGoal('B', _ogPlayerB!, _ogMinuteB || 0); _ogPlayerB=null; _ogMinuteB=null" [disabled]="!_ogPlayerB || !canEdit" title="Thêm phản lưới"><i class="fas fa-plus"></i></button>
-            </div>
-            <ul class="event-list">
-              <li *ngFor="let og of ownGoalsB; let i=index">
-                <span class="badge own-goal">🔴 {{ getPlayerName(og.playerId) }} <small *ngIf="og.minute!==undefined">({{og.minute}}')</small></span>
-                <button class="remove" *appCanEdit (click)="removeOwnGoal('B',i)">×</button>
-              </li>
-            </ul>
-          </div>
-
-          <div class="event-group">
-            <h5>Thẻ</h5>
-            <div class="inline-form">
-              <select [(ngModel)]="_ycPlayerB" [disabled]="!canEdit">
-                <option [ngValue]="null">Vàng</option>
-                <option *ngFor="let p of teamB" [ngValue]="p.id">{{p.firstName}}</option>
-              </select>
-              <input type="number" min="0" max="120" [(ngModel)]="_ycMinuteB" placeholder="Phút" [disabled]="!canEdit" />
-              <button (click)="addCard('yellow','B',_ycPlayerB!, _ycMinuteB||0); _ycPlayerB=null; _ycMinuteB=null" [disabled]="!_ycPlayerB || !canEdit" title="Thêm thẻ vàng"><i class="fas fa-plus"></i></button>
-            </div>
-            <div class="inline-form">
-              <select [(ngModel)]="_rcPlayerB" [disabled]="!canEdit">
-                <option [ngValue]="null">Đỏ</option>
-                <option *ngFor="let p of teamB" [ngValue]="p.id">{{p.firstName}}</option>
-              </select>
-              <input type="number" min="0" max="120" [(ngModel)]="_rcMinuteB" placeholder="Phút" [disabled]="!canEdit" />
-              <button (click)="addCard('red','B',_rcPlayerB!, _rcMinuteB||0); _rcPlayerB=null; _rcMinuteB=null" [disabled]="!_rcPlayerB || !canEdit" title="Thêm thẻ đỏ"><i class="fas fa-plus"></i></button>
-            </div>
-            <ul class="event-list">
-              <li *ngFor="let c of yellowCardsB; let yi=index">
-                <span class="badge yc">🟨 {{ getPlayerName(c.playerId) }} <small *ngIf="c.minute!==undefined">({{c.minute}}')</small></span>
-                <button class="remove" *appCanEdit (click)="removeCard('yellow','B',yi)">×</button>
-              </li>
-              <li *ngFor="let c of redCardsB; let ri=index">
-                <span class="badge rc">🟥 {{ getPlayerName(c.playerId) }} <small *ngIf="c.minute!==undefined">({{c.minute}}')</small></span>
-                <button class="remove" *appCanEdit (click)="removeCard('red','B',ri)">×</button>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
+      </section>
+    }
 
     <!-- Thu/Chi Section -->
-  <section class="finance-summary" role="region" aria-labelledby="financeHeading">
-    <h3 id="financeHeading" class="finance-title"><i class="fas fa-coins me-2"></i>Thu/Chi trận đấu</h3>
+    <section class="finance-summary" role="region" aria-labelledby="financeHeading">
+      <h3 id="financeHeading" class="finance-title"><i class="fas fa-coins me-2"></i>Thu/Chi trận đấu</h3>
       <div class="finance-grid">
         <div class="finance-card">
           <h4>Thu nhập</h4>
@@ -276,12 +335,14 @@
 
     <!-- Legacy DnD component removed: integrated drag & drop now inside TeamsPanel -->
 
-    <ng-container *ngIf="teamA.length && teamB.length">
-      <ng-container *ngIf="aiLoaded">
+    @if (teamA.length && teamB.length) {
+      @if (aiLoaded) {
         <ng-container *ngComponentOutlet="aiComponent; inputs: { teamA: teamA, teamB: teamB, ai: aiAnalysisResults, isAnalyzing: isAnalyzing, runAnalysis: runAIAnalysis }"></ng-container>
-      </ng-container>
-    </ng-container>
+      }
+    }
 
 
   </div>
-  <div class="save-status-inline" *ngIf="matchSaveMessage">{{ matchSaveMessage }}</div>
+  @if (matchSaveMessage) {
+    <div class="save-status-inline">{{ matchSaveMessage }}</div>
+  }

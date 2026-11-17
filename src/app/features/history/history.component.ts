@@ -34,9 +34,9 @@ import { Router } from '@angular/router';
               <i class="fas fa-sync-alt"></i>
               <span>Sync Data</span>
             </button>
-            <button 
-              class="action-button fund-sync-btn" 
-              (click)="syncFundFromHistory()" 
+            <button
+              class="action-button fund-sync-btn"
+              (click)="syncFundFromHistory()"
               [disabled]="isSyncingFund"
               *appCanEdit>
               <i class="fas" [class.fa-sync-alt]="isSyncingFund" [class.fa-spin]="isSyncingFund" [class.fa-coins]="!isSyncingFund"></i>
@@ -49,13 +49,15 @@ import { Router } from '@angular/router';
           </div>
         </div>
       </div>
-
+    
       <!-- Fund Sync Result -->
-      <div class="fund-sync-alert success-alert" *ngIf="showFundSyncResult" aria-live="polite" aria-atomic="true">
-        <i class="fas fa-check-circle"></i>
-        <span>{{ fundSyncMessage }}</span>
-      </div>
-
+      @if (showFundSyncResult) {
+        <div class="fund-sync-alert success-alert" aria-live="polite" aria-atomic="true">
+          <i class="fas fa-check-circle"></i>
+          <span>{{ fundSyncMessage }}</span>
+        </div>
+      }
+    
       <!-- Modern Financial Overview Section -->
       <div class="financial-overview-section">
         <div class="section-header-modern">
@@ -64,7 +66,7 @@ import { Router } from '@angular/router';
             <h2>Tổng quan tài chính</h2>
           </div>
         </div>
-        
+    
         <div class="financial-cards-grid">
           <!-- Revenue Card -->
           <div class="financial-card revenue-card">
@@ -82,7 +84,7 @@ import { Router } from '@angular/router';
             </div>
             <div class="card-decoration"></div>
           </div>
-          
+    
           <!-- Expense Card -->
           <div class="financial-card expense-card">
             <div class="card-icon-wrapper">
@@ -99,7 +101,7 @@ import { Router } from '@angular/router';
             </div>
             <div class="card-decoration"></div>
           </div>
-          
+    
           <!-- Balance Card -->
           <div class="financial-card balance-card" [class.positive]="getNetProfit() >= 0" [class.negative]="getNetProfit() < 0">
             <div class="card-icon-wrapper">
@@ -116,7 +118,7 @@ import { Router } from '@angular/router';
             </div>
             <div class="card-decoration"></div>
           </div>
-
+    
           <!-- Average Card -->
           <div class="financial-card average-card">
             <div class="card-icon-wrapper">
@@ -135,462 +137,487 @@ import { Router } from '@angular/router';
           </div>
         </div>
       </div>
-
+    
       <!-- Kết quả trận đấu Section -->
       <div class="matches-section">
         <div class="section-header">
           <h2 class="section-title">Kết quả trận đấu</h2>
         </div>
-
-  <div class="matches-list" *ngIf="!loading && filteredMatches.length > 0; else loadingOrEmpty">
-          <!-- Date Groups -->
-          <div class="date-group" *ngFor="let dateGroup of getMatchesByDate(); trackBy: trackByDateGroup">
-            <!-- Date Group Header -->
-            <div 
-              class="date-group-header"
-              [class.collapsed]="isDateCollapsed(dateGroup.date)"
-              (click)="toggleDateCollapse(dateGroup.date)"
-              (keydown)="toggleDateCollapse(dateGroup.date, $event)"
-              tabindex="0"
-              role="button"
-              [attr.aria-expanded]="!isDateCollapsed(dateGroup.date)"
-              [attr.aria-controls]="'date-group-' + dateGroup.date"
-              [attr.aria-label]="'Toggle matches for ' + getDateDisplayText(dateGroup.date)">
-              
-              <div class="date-header-content">
-                <h3 class="date-title">{{ getDateDisplayText(dateGroup.date) }}</h3>
-                <span class="match-count">{{ getMatchCountForDate(dateGroup.matches) }}</span>
-              </div>
-              
-              <div class="collapse-indicator">
-                <span class="collapse-icon" [attr.aria-hidden]="true">
-                  {{ isDateCollapsed(dateGroup.date) ? '▶' : '▼' }}
-                </span>
-              </div>
-            </div>
-
-            <!-- Date Group Content -->
-            <div 
-              class="date-group-content"
-              [class.collapsed]="isDateCollapsed(dateGroup.date)"
-              [id]="'date-group-' + dateGroup.date"
-              [attr.aria-hidden]="isDateCollapsed(dateGroup.date)">
-              
-              <!-- Individual match cards for this date -->
-              <div class="match-card" 
-                   *ngFor="let match of dateGroup.matches; trackBy: trackByMatchId"
-                   [class.collapsed]="isMatchCollapsed(match.id)">
-                
-                <!-- Match Header (Always Visible - Collapsed State) -->
-                <div 
-                  class="match-header-clickable"
-                  (click)="toggleMatchCollapse(match.id, $event)"
-                  (keydown.enter)="toggleMatchCollapse(match.id, $event)"
-                  (keydown.space)="toggleMatchCollapse(match.id, $event)"
+    
+        @if (!loading && filteredMatches.length > 0) {
+          <div class="matches-list">
+            <!-- Date Groups -->
+            @for (dateGroup of getMatchesByDate(); track trackByDateGroup($index, dateGroup)) {
+              <div class="date-group">
+                <!-- Date Group Header -->
+                <div
+                  class="date-group-header"
+                  [class.collapsed]="isDateCollapsed(dateGroup.date)"
+                  (click)="toggleDateCollapse(dateGroup.date)"
+                  (keydown)="toggleDateCollapse(dateGroup.date, $event)"
                   tabindex="0"
                   role="button"
-                  [attr.aria-expanded]="!isMatchCollapsed(match.id)"
-                  [attr.aria-controls]="'match-details-' + match.id">
-                  
-                  <div class="match-summary">
-                    <div class="match-date-inline">
-                      <i class="fas fa-calendar-alt"></i>
-                      <span class="date-text">{{ formatMatchDate(match.date) }}</span>
-                    </div>
-                    
-                    <div class="score-summary">
-                      <span class="team-name-short blue">Đội Xanh</span>
-                      <span class="score-badge">{{ match.scoreA || 0 }}</span>
-                      <span class="vs-text">-</span>
-                      <span class="score-badge">{{ match.scoreB || 0 }}</span>
-                      <span class="team-name-short orange">Đội Cam</span>
-                    </div>
-                    
-                    <div class="match-actions-inline" *appCanEdit role="presentation" (click)="$event.stopPropagation()">
-                      <button class="action-btn-small edit" (click)="editMatch(match)" title="Chỉnh sửa">
-                        <i class="fas fa-edit"></i>
-                      </button>
-                      <button class="action-btn-small delete" (click)="confirmDeleteMatch(match)" title="Xóa">
-                        <i class="fas fa-trash"></i>
-                      </button>
-                    </div>
+                  [attr.aria-expanded]="!isDateCollapsed(dateGroup.date)"
+                  [attr.aria-controls]="'date-group-' + dateGroup.date"
+                  [attr.aria-label]="'Toggle matches for ' + getDateDisplayText(dateGroup.date)">
+                  <div class="date-header-content">
+                    <h3 class="date-title">{{ getDateDisplayText(dateGroup.date) }}</h3>
+                    <span class="match-count">{{ getMatchCountForDate(dateGroup.matches) }}</span>
                   </div>
-                  
-                  <div class="collapse-indicator-match">
-                    <i class="fas" [class.fa-chevron-down]="isMatchCollapsed(match.id)" [class.fa-chevron-up]="!isMatchCollapsed(match.id)"></i>
+                  <div class="collapse-indicator">
+                    <span class="collapse-icon" [attr.aria-hidden]="true">
+                      {{ isDateCollapsed(dateGroup.date) ? '▶' : '▼' }}
+                    </span>
                   </div>
                 </div>
-
-                <!-- Match Details (Expandable Content) -->
-                <div 
-                  class="match-details"
-                  [class.collapsed]="isMatchCollapsed(match.id)"
-                  [id]="'match-details-' + match.id"
-                  [attr.aria-hidden]="isMatchCollapsed(match.id)">
-
-            <!-- Score Display -->
-            <div class="score-display">
-              <div class="team team-blue">
-                <div class="team-name">Đội Xanh</div>
-                <div class="team-score">{{ match.scoreA || 0 }}</div>
+                <!-- Date Group Content -->
+                <div
+                  class="date-group-content"
+                  [class.collapsed]="isDateCollapsed(dateGroup.date)"
+                  [id]="'date-group-' + dateGroup.date"
+                  [attr.aria-hidden]="isDateCollapsed(dateGroup.date)">
+                  <!-- Individual match cards for this date -->
+                  @for (match of dateGroup.matches; track trackByMatchId($index, match)) {
+                    <div class="match-card"
+                      [class.collapsed]="isMatchCollapsed(match.id)">
+                      <!-- Match Header (Always Visible - Collapsed State) -->
+                      <div
+                        class="match-header-clickable"
+                        (click)="toggleMatchCollapse(match.id, $event)"
+                        (keydown.enter)="toggleMatchCollapse(match.id, $event)"
+                        (keydown.space)="toggleMatchCollapse(match.id, $event)"
+                        tabindex="0"
+                        role="button"
+                        [attr.aria-expanded]="!isMatchCollapsed(match.id)"
+                        [attr.aria-controls]="'match-details-' + match.id">
+                        <div class="match-summary">
+                          <div class="match-date-inline">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span class="date-text">{{ formatMatchDate(match.date) }}</span>
+                          </div>
+                          <div class="score-summary">
+                            <span class="team-name-short blue">Đội Xanh</span>
+                            <span class="score-badge">{{ match.scoreA || 0 }}</span>
+                            <span class="vs-text">-</span>
+                            <span class="score-badge">{{ match.scoreB || 0 }}</span>
+                            <span class="team-name-short orange">Đội Cam</span>
+                          </div>
+                          <div class="match-actions-inline" *appCanEdit role="presentation" (click)="$event.stopPropagation()">
+                            <button class="action-btn-small edit" (click)="editMatch(match)" title="Chỉnh sửa">
+                              <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn-small delete" (click)="confirmDeleteMatch(match)" title="Xóa">
+                              <i class="fas fa-trash"></i>
+                            </button>
+                          </div>
+                        </div>
+                        <div class="collapse-indicator-match">
+                          <i class="fas" [class.fa-chevron-down]="isMatchCollapsed(match.id)" [class.fa-chevron-up]="!isMatchCollapsed(match.id)"></i>
+                        </div>
+                      </div>
+                      <!-- Match Details (Expandable Content) -->
+                      <div
+                        class="match-details"
+                        [class.collapsed]="isMatchCollapsed(match.id)"
+                        [id]="'match-details-' + match.id"
+                        [attr.aria-hidden]="isMatchCollapsed(match.id)">
+                        <!-- Score Display -->
+                        <div class="score-display">
+                          <div class="team team-blue">
+                            <div class="team-name">Đội Xanh</div>
+                            <div class="team-score">{{ match.scoreA || 0 }}</div>
+                          </div>
+                          <div class="vs-divider">VS</div>
+                          <div class="team team-orange">
+                            <div class="team-name">Đội Cam</div>
+                            <div class="team-score">{{ match.scoreB || 0 }}</div>
+                          </div>
+                        </div>
+                        <!-- Team Players -->
+                        @if (match.teamA || match.teamB) {
+                          <div class="teams-display">
+                            <div class="team-players blue">
+                              <div class="team-header">
+                                <span class="team-dot blue-dot"></span>
+                                Đội Xanh ({{ getTeamSize(match.teamA) }})
+                              </div>
+                              <div class="players-grid">
+                                @for (player of match.teamA; track player) {
+                                  <span class="player-tag">{{ player }}</span>
+                                }
+                              </div>
+                            </div>
+                            <div class="team-players orange">
+                              <div class="team-header">
+                                <span class="team-dot orange-dot"></span>
+                                Đội Cam ({{ getTeamSize(match.teamB) }})
+                              </div>
+                              <div class="players-grid">
+                                @for (player of match.teamB; track player) {
+                                  <span class="player-tag">{{ player }}</span>
+                                }
+                              </div>
+                            </div>
+                          </div>
+                        }
+                        <!-- Match Statistics -->
+                        @if (getGoalScorers(match, 'A') || getGoalScorers(match, 'B') || getAssists(match, 'A') || getAssists(match, 'B') || getCards(match, 'A', 'yellow') || getCards(match, 'B', 'yellow') || getCards(match, 'A', 'red') || getCards(match, 'B', 'red')) {
+                          <div class="match-statistics">
+                            <div class="stats-header">
+                              <span class="stats-title">📊 Thống kê trận đấu</span>
+                            </div>
+                            <div class="stats-content">
+                              <!-- Goals Section -->
+                              @if (getGoalScorers(match, 'A') || getGoalScorers(match, 'B')) {
+                                <div class="stat-section">
+                                  <div class="stat-title">
+                                    <i class="fas fa-futbol"></i>
+                                    Bàn thắng
+                                  </div>
+                                  <div class="stat-teams">
+                                    @if (getGoalScorers(match, 'A')) {
+                                      <div class="team-stat blue">
+                                        <span class="team-label">Đội Xanh:</span>
+                                        <span class="stat-value">{{ getGoalScorers(match, 'A') }}</span>
+                                      </div>
+                                    }
+                                    @if (getGoalScorers(match, 'B')) {
+                                      <div class="team-stat orange">
+                                        <span class="team-label">Đội Cam:</span>
+                                        <span class="stat-value">{{ getGoalScorers(match, 'B') }}</span>
+                                      </div>
+                                    }
+                                  </div>
+                                </div>
+                              }
+                              <!-- Assists Section -->
+                              @if (getAssists(match, 'A') || getAssists(match, 'B')) {
+                                <div class="stat-section">
+                                  <div class="stat-title">
+                                    <i class="fas fa-hands-helping"></i>
+                                    Kiến tạo
+                                  </div>
+                                  <div class="stat-teams">
+                                    @if (getAssists(match, 'A')) {
+                                      <div class="team-stat blue">
+                                        <span class="team-label">Đội Xanh:</span>
+                                        <span class="stat-value">{{ getAssists(match, 'A') }}</span>
+                                      </div>
+                                    }
+                                    @if (getAssists(match, 'B')) {
+                                      <div class="team-stat orange">
+                                        <span class="team-label">Đội Cam:</span>
+                                        <span class="stat-value">{{ getAssists(match, 'B') }}</span>
+                                      </div>
+                                    }
+                                  </div>
+                                </div>
+                              }
+                              <!-- Own Goals Section -->
+                              @if (getOwnGoals(match, 'A') || getOwnGoals(match, 'B')) {
+                                <div class="stat-section">
+                                  <div class="stat-title">
+                                    <i class="fas fa-times-circle text-danger"></i>
+                                    Phản lưới
+                                  </div>
+                                  <div class="stat-teams">
+                                    @if (getOwnGoals(match, 'A')) {
+                                      <div class="team-stat blue">
+                                        <span class="team-label">Đội Xanh:</span>
+                                        <span class="stat-value">{{ getOwnGoals(match, 'A') }}</span>
+                                      </div>
+                                    }
+                                    @if (getOwnGoals(match, 'B')) {
+                                      <div class="team-stat orange">
+                                        <span class="team-label">Đội Cam:</span>
+                                        <span class="stat-value">{{ getOwnGoals(match, 'B') }}</span>
+                                      </div>
+                                    }
+                                  </div>
+                                </div>
+                              }
+                              <!-- Yellow Cards Section -->
+                              @if (getCards(match, 'A', 'yellow') || getCards(match, 'B', 'yellow')) {
+                                <div class="stat-section">
+                                  <div class="stat-title">
+                                    <i class="fas fa-square text-warning"></i>
+                                    Thẻ vàng
+                                  </div>
+                                  <div class="stat-teams">
+                                    @if (getCards(match, 'A', 'yellow')) {
+                                      <div class="team-stat blue">
+                                        <span class="team-label">Đội Xanh:</span>
+                                        <span class="stat-value">{{ getCards(match, 'A', 'yellow') }}</span>
+                                      </div>
+                                    }
+                                    @if (getCards(match, 'B', 'yellow')) {
+                                      <div class="team-stat orange">
+                                        <span class="team-label">Đội Cam:</span>
+                                        <span class="stat-value">{{ getCards(match, 'B', 'yellow') }}</span>
+                                      </div>
+                                    }
+                                  </div>
+                                </div>
+                              }
+                              <!-- Red Cards Section -->
+                              @if (getCards(match, 'A', 'red') || getCards(match, 'B', 'red')) {
+                                <div class="stat-section">
+                                  <div class="stat-title">
+                                    <i class="fas fa-square text-danger"></i>
+                                    Thẻ đỏ
+                                  </div>
+                                  <div class="stat-teams">
+                                    @if (getCards(match, 'A', 'red')) {
+                                      <div class="team-stat blue">
+                                        <span class="team-label">Đội Xanh:</span>
+                                        <span class="stat-value">{{ getCards(match, 'A', 'red') }}</span>
+                                      </div>
+                                    }
+                                    @if (getCards(match, 'B', 'red')) {
+                                      <div class="team-stat orange">
+                                        <span class="team-label">Đội Cam:</span>
+                                        <span class="stat-value">{{ getCards(match, 'B', 'red') }}</span>
+                                      </div>
+                                    }
+                                  </div>
+                                </div>
+                              }
+                            </div>
+                          </div>
+                        }
+                        <!-- Financial Info -->
+                        @if (match.thu || match.chi_total) {
+                          <div class="match-finance">
+                            <div class="finance-header">
+                              <span class="finance-title">Tài chính</span>
+                              <span class="finance-summary">
+                                Thu: {{ match.thu | number:'1.0-0' }} đ | Chi: {{ match.chi_total | number:'1.0-0' }} đ
+                              </span>
+                            </div>
+                            <div class="finance-details">
+                              <div class="finance-group income">
+                                <h4>Thu nhập</h4>
+                                <div class="finance-row">
+                                  <span>Thu chính:</span>
+                                  <span>{{ match.thu_main || match.thu || 0 | number:'1.0-0' }} đ</span>
+                                </div>
+                                <div class="finance-total">
+                                  <strong>Tổng: {{ match.thu | number:'1.0-0' }} đ</strong>
+                                </div>
+                              </div>
+                              <div class="finance-group expense">
+                                <h4>Chi phí</h4>
+                                @if (match.chi_san) {
+                                  <div class="finance-row">
+                                    <span>Sân:</span>
+                                    <span>{{ match.chi_san | number:'1.0-0' }} đ</span>
+                                  </div>
+                                }
+                                @if (match.chi_trongtai) {
+                                  <div class="finance-row">
+                                    <span>Trọng tài:</span>
+                                    <span>{{ match.chi_trongtai | number:'1.0-0' }} đ</span>
+                                  </div>
+                                }
+                                @if (match.chi_nuoc) {
+                                  <div class="finance-row">
+                                    <span>Nước:</span>
+                                    <span>{{ match.chi_nuoc | number:'1.0-0' }} đ</span>
+                                  </div>
+                                }
+                                <div class="finance-total">
+                                  <strong>Tổng: {{ match.chi_total | number:'1.0-0' }} đ</strong>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
               </div>
-              
-              <div class="vs-divider">VS</div>
-              
-              <div class="team team-orange">
-                <div class="team-name">Đội Cam</div>
-                <div class="team-score">{{ match.scoreB || 0 }}</div>
-              </div>
-            </div>
-            
-            <!-- Team Players -->
-            <div class="teams-display" *ngIf="match.teamA || match.teamB">
-              <div class="team-players blue">
-                <div class="team-header">
-                  <span class="team-dot blue-dot"></span>
-                  Đội Xanh ({{ getTeamSize(match.teamA) }})
-                </div>
-                <div class="players-grid">
-                  <span class="player-tag" *ngFor="let player of match.teamA">{{ player }}</span>
-                </div>
-              </div>
-              
-              <div class="team-players orange">
-                <div class="team-header">
-                  <span class="team-dot orange-dot"></span>
-                  Đội Cam ({{ getTeamSize(match.teamB) }})
-                </div>
-                <div class="players-grid">
-                  <span class="player-tag" *ngFor="let player of match.teamB">{{ player }}</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Match Statistics -->
-            <div class="match-statistics" *ngIf="getGoalScorers(match, 'A') || getGoalScorers(match, 'B') || getAssists(match, 'A') || getAssists(match, 'B') || getCards(match, 'A', 'yellow') || getCards(match, 'B', 'yellow') || getCards(match, 'A', 'red') || getCards(match, 'B', 'red')">
-              <div class="stats-header">
-                <span class="stats-title">📊 Thống kê trận đấu</span>
-              </div>
-              
-              <div class="stats-content">
-                <!-- Goals Section -->
-                <div class="stat-section" *ngIf="getGoalScorers(match, 'A') || getGoalScorers(match, 'B')">
-                  <div class="stat-title">
-                    <i class="fas fa-futbol"></i>
-                    Bàn thắng
-                  </div>
-                  <div class="stat-teams">
-                    <div class="team-stat blue" *ngIf="getGoalScorers(match, 'A')">
-                      <span class="team-label">Đội Xanh:</span>
-                      <span class="stat-value">{{ getGoalScorers(match, 'A') }}</span>
-                    </div>
-                    <div class="team-stat orange" *ngIf="getGoalScorers(match, 'B')">
-                      <span class="team-label">Đội Cam:</span>
-                      <span class="stat-value">{{ getGoalScorers(match, 'B') }}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Assists Section -->
-                <div class="stat-section" *ngIf="getAssists(match, 'A') || getAssists(match, 'B')">
-                  <div class="stat-title">
-                    <i class="fas fa-hands-helping"></i>
-                    Kiến tạo
-                  </div>
-                  <div class="stat-teams">
-                    <div class="team-stat blue" *ngIf="getAssists(match, 'A')">
-                      <span class="team-label">Đội Xanh:</span>
-                      <span class="stat-value">{{ getAssists(match, 'A') }}</span>
-                    </div>
-                    <div class="team-stat orange" *ngIf="getAssists(match, 'B')">
-                      <span class="team-label">Đội Cam:</span>
-                      <span class="stat-value">{{ getAssists(match, 'B') }}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Own Goals Section -->
-                <div class="stat-section" *ngIf="getOwnGoals(match, 'A') || getOwnGoals(match, 'B')">
-                  <div class="stat-title">
-                    <i class="fas fa-times-circle text-danger"></i>
-                    Phản lưới
-                  </div>
-                  <div class="stat-teams">
-                    <div class="team-stat blue" *ngIf="getOwnGoals(match, 'A')">
-                      <span class="team-label">Đội Xanh:</span>
-                      <span class="stat-value">{{ getOwnGoals(match, 'A') }}</span>
-                    </div>
-                    <div class="team-stat orange" *ngIf="getOwnGoals(match, 'B')">
-                      <span class="team-label">Đội Cam:</span>
-                      <span class="stat-value">{{ getOwnGoals(match, 'B') }}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Yellow Cards Section -->
-                <div class="stat-section" *ngIf="getCards(match, 'A', 'yellow') || getCards(match, 'B', 'yellow')">
-                  <div class="stat-title">
-                    <i class="fas fa-square text-warning"></i>
-                    Thẻ vàng
-                  </div>
-                  <div class="stat-teams">
-                    <div class="team-stat blue" *ngIf="getCards(match, 'A', 'yellow')">
-                      <span class="team-label">Đội Xanh:</span>
-                      <span class="stat-value">{{ getCards(match, 'A', 'yellow') }}</span>
-                    </div>
-                    <div class="team-stat orange" *ngIf="getCards(match, 'B', 'yellow')">
-                      <span class="team-label">Đội Cam:</span>
-                      <span class="stat-value">{{ getCards(match, 'B', 'yellow') }}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Red Cards Section -->
-                <div class="stat-section" *ngIf="getCards(match, 'A', 'red') || getCards(match, 'B', 'red')">
-                  <div class="stat-title">
-                    <i class="fas fa-square text-danger"></i>
-                    Thẻ đỏ
-                  </div>
-                  <div class="stat-teams">
-                    <div class="team-stat blue" *ngIf="getCards(match, 'A', 'red')">
-                      <span class="team-label">Đội Xanh:</span>
-                      <span class="stat-value">{{ getCards(match, 'A', 'red') }}</span>
-                    </div>
-                    <div class="team-stat orange" *ngIf="getCards(match, 'B', 'red')">
-                      <span class="team-label">Đội Cam:</span>
-                      <span class="stat-value">{{ getCards(match, 'B', 'red') }}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Financial Info -->
-            <div class="match-finance" *ngIf="match.thu || match.chi_total">
-              <div class="finance-header">
-                <span class="finance-title">Tài chính</span>
-                <span class="finance-summary">
-                  Thu: {{ match.thu | number:'1.0-0' }} đ | Chi: {{ match.chi_total | number:'1.0-0' }} đ
-                </span>
-              </div>
-              
-              <div class="finance-details">
-                <div class="finance-group income">
-                  <h4>Thu nhập</h4>
-                  <div class="finance-row">
-                    <span>Thu chính:</span>
-                    <span>{{ match.thu_main || match.thu || 0 | number:'1.0-0' }} đ</span>
-                  </div>
-                  <div class="finance-total">
-                    <strong>Tổng: {{ match.thu | number:'1.0-0' }} đ</strong>
-                  </div>
-                </div>
-                
-                <div class="finance-group expense">
-                  <h4>Chi phí</h4>
-                  <div class="finance-row" *ngIf="match.chi_san">
-                    <span>Sân:</span>
-                    <span>{{ match.chi_san | number:'1.0-0' }} đ</span>
-                  </div>
-                  <div class="finance-row" *ngIf="match.chi_trongtai">
-                    <span>Trọng tài:</span>
-                    <span>{{ match.chi_trongtai | number:'1.0-0' }} đ</span>
-                  </div>
-                  <div class="finance-row" *ngIf="match.chi_nuoc">
-                    <span>Nước:</span>
-                    <span>{{ match.chi_nuoc | number:'1.0-0' }} đ</span>
-                  </div>
-                  <div class="finance-total">
-                    <strong>Tổng: {{ match.chi_total | number:'1.0-0' }} đ</strong>
-                  </div>
-                </div>
-              </div>
-            </div>
-                </div>
-              </div>
-            </div>
+            }
           </div>
-        </div>
-
+        } @else {
+          @if (loading) {
+            <div class="skeleton-list">
+              @for (s of skeletonArray; track s) {
+                <div class="skeleton-card">
+                  <div class="skeleton-line w-40"></div>
+                  <div class="skeleton-line w-60"></div>
+                  <div class="skeleton-line w-30"></div>
+                </div>
+              }
+            </div>
+          }
+          @if (!loading) {
+            <div class="empty-state">
+              <div class="empty-icon">🏆</div>
+              <h3>Chưa có lịch sử trận đấu</h3>
+              <p>Bắt đầu thi đấu để xem lịch sử và phân tích tài chính tại đây.</p>
+            </div>
+          }
+        }
+    
         <!-- Loading / Empty State -->
-        <ng-template #loadingOrEmpty>
-          <div *ngIf="loading" class="skeleton-list">
-            <div class="skeleton-card" *ngFor="let s of skeletonArray">
-              <div class="skeleton-line w-40"></div>
-              <div class="skeleton-line w-60"></div>
-              <div class="skeleton-line w-30"></div>
-            </div>
-          </div>
-          <div *ngIf="!loading" class="empty-state">
-            <div class="empty-icon">🏆</div>
-            <h3>Chưa có lịch sử trận đấu</h3>
-            <p>Bắt đầu thi đấu để xem lịch sử và phân tích tài chính tại đây.</p>
-          </div>
-        </ng-template>
       </div>
-      
+    
       <!-- Edit Match Modal -->
-  <div class="modal-overlay" *ngIf="showEditModal && canEdit" (click)="cancelEdit()" tabindex="0" (keydown)="onOverlayKey($event)">
-        <div class="modal-content edit-modal" (click)="$event.stopPropagation()" tabindex="0" (keydown)="onModalKey($event)">
-          <div class="modal-header">
-            <h3>✏️ Chỉnh sửa trận đấu</h3>
-            <button class="close-btn" (click)="cancelEdit()">&times;</button>
-          </div>
-          
-          <div class="modal-body">
-            <form>
-              <!-- Date and Score Section -->
-              <div class="form-section">
-                <h4>Thông tin trận đấu</h4>
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="edit-date">Ngày thi đấu</label>
-                    <input id="edit-date" type="date" [(ngModel)]="editFormData.date" name="date" class="form-control">
-                  </div>
-                </div>
-                
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="edit-scoreA">Tỷ số Đội Xanh</label>
-                    <input id="edit-scoreA" type="number" [(ngModel)]="editFormData.scoreA" name="scoreA" class="form-control" min="0">
-                  </div>
-                  <div class="form-group">
-                    <label for="edit-scoreB">Tỷ số Đội Cam</label>
-                    <input id="edit-scoreB" type="number" [(ngModel)]="editFormData.scoreB" name="scoreB" class="form-control" min="0">
-                  </div>
-                </div>
-              </div>
-
-              <!-- Scorers and Assists Section -->
-              <div class="form-section">
-                <h4>Ghi bàn và Kiến tạo</h4>
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="edit-scorerA">Ghi bàn Đội Xanh</label>
-                    <input id="edit-scorerA" type="text" [(ngModel)]="editFormData.scorerA" name="scorerA" class="form-control" placeholder="Tên cầu thủ ghi bàn">
-                  </div>
-                  <div class="form-group">
-                    <label for="edit-assistA">Kiến tạo Đội Xanh</label>
-                    <input id="edit-assistA" type="text" [(ngModel)]="editFormData.assistA" name="assistA" class="form-control" placeholder="Tên cầu thủ kiến tạo">
-                  </div>
-                </div>
-                
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="edit-scorerB">Ghi bàn Đội Cam</label>
-                    <input id="edit-scorerB" type="text" [(ngModel)]="editFormData.scorerB" name="scorerB" class="form-control" placeholder="Tên cầu thủ ghi bàn">
-                  </div>
-                  <div class="form-group">
-                    <label for="edit-assistB">Kiến tạo Đội Cam</label>
-                    <input id="edit-assistB" type="text" [(ngModel)]="editFormData.assistB" name="assistB" class="form-control" placeholder="Tên cầu thủ kiến tạo">
-                  </div>
-                </div>
-
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="edit-ownGoalA">Phản lưới Đội Xanh</label>
-                    <input id="edit-ownGoalA" type="text" [(ngModel)]="editFormData.ownGoalA" name="ownGoalA" class="form-control" placeholder="Tên cầu thủ phản lưới">
-                  </div>
-                  <div class="form-group">
-                    <label for="edit-ownGoalB">Phản lưới Đội Cam</label>
-                    <input id="edit-ownGoalB" type="text" [(ngModel)]="editFormData.ownGoalB" name="ownGoalB" class="form-control" placeholder="Tên cầu thủ phản lưới">
-                  </div>
-                </div>
-              </div>
-
-              <!-- Cards Section -->
-              <div class="form-section">
-                <h4>Thẻ phạt</h4>
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="edit-yellowA">Thẻ vàng Đội Xanh</label>
-                    <input id="edit-yellowA" type="text" [(ngModel)]="editFormData.yellowA" name="yellowA" class="form-control" placeholder="Danh sách cầu thủ nhận thẻ vàng">
-                  </div>
-                  <div class="form-group">
-                    <label for="edit-yellowB">Thẻ vàng Đội Cam</label>
-                    <input id="edit-yellowB" type="text" [(ngModel)]="editFormData.yellowB" name="yellowB" class="form-control" placeholder="Danh sách cầu thủ nhận thẻ vàng">
-                  </div>
-                </div>
-                
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="edit-redA">Thẻ đỏ Đội Xanh</label>
-                    <input id="edit-redA" type="text" [(ngModel)]="editFormData.redA" name="redA" class="form-control" placeholder="Danh sách cầu thủ nhận thẻ đỏ">
-                  </div>
-                  <div class="form-group">
-                    <label for="edit-redB">Thẻ đỏ Đội Cam</label>
-                    <input id="edit-redB" type="text" [(ngModel)]="editFormData.redB" name="redB" class="form-control" placeholder="Danh sách cầu thủ nhận thẻ đỏ">
-                  </div>
-                </div>
-              </div>
-
-              <!-- Financial Section -->
-              <div class="form-section">
-                <h4>Tài chính</h4>
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="edit-thu">Tổng thu (đ)</label>
-                    <input id="edit-thu" type="number" [(ngModel)]="editFormData.thu" name="thu" class="form-control" min="0">
-                  </div>
-                  <div class="form-group">
-                    <label for="edit-chi_total">Tổng chi (đ)</label>
-                    <input id="edit-chi_total" type="number" [(ngModel)]="editFormData.chi_total" name="chi_total" class="form-control" min="0">
-                  </div>
-                </div>
-                
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="edit-chi_san">Chi sân (đ)</label>
-                    <input id="edit-chi_san" type="number" [(ngModel)]="editFormData.chi_san" name="chi_san" class="form-control" min="0">
-                  </div>
-                  <div class="form-group">
-                    <label for="edit-chi_trongtai">Chi trọng tài (đ)</label>
-                    <input id="edit-chi_trongtai" type="number" [(ngModel)]="editFormData.chi_trongtai" name="chi_trongtai" class="form-control" min="0">
-                  </div>
-                </div>
-                
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="edit-chi_nuoc">Chi nước (đ)</label>
-                    <input id="edit-chi_nuoc" type="number" [(ngModel)]="editFormData.chi_nuoc" name="chi_nuoc" class="form-control" min="0">
-                  </div>
-                </div>
-              </div>
-            </form>
-          </div>
-          
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" (click)="cancelEdit()">Hủy</button>
-            <button type="button" class="btn btn-primary" (click)="saveEditedMatch()">💾 Lưu thay đổi</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Delete Confirmation Modal -->
-  <div class="modal-overlay" *ngIf="showDeleteModal && canEdit" (click)="cancelDelete()" tabindex="0" (keydown)="onOverlayKey($event)">
-        <div class="modal-content delete-modal" (click)="$event.stopPropagation()" tabindex="0" (keydown)="onModalKey($event)">
-          <div class="modal-header">
-            <h3>🗑️ Xác nhận xóa</h3>
-            <button class="close-btn" (click)="cancelDelete()">&times;</button>
-          </div>
-          
-          <div class="modal-body">
-            <p>Bạn có chắc chắn muốn xóa trận đấu này không?</p>
-            <div class="match-info" *ngIf="matchToDelete">
-              <strong>Ngày:</strong> {{ formatMatchDate(matchToDelete.date) }}<br>
-              <strong>Tỷ số:</strong> {{ matchToDelete.scoreA || 0 }} - {{ matchToDelete.scoreB || 0 }}
+      @if (showEditModal && canEdit) {
+        <div class="modal-overlay" (click)="cancelEdit()" tabindex="0" (keydown)="onOverlayKey($event)">
+          <div class="modal-content edit-modal" (click)="$event.stopPropagation()" tabindex="0" (keydown)="onModalKey($event)">
+            <div class="modal-header">
+              <h3>✏️ Chỉnh sửa trận đấu</h3>
+              <button class="close-btn" (click)="cancelEdit()">&times;</button>
             </div>
-            <p class="warning-text">⚠️ Hành động này không thể hoàn tác!</p>
-          </div>
-          
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" (click)="cancelDelete()">Hủy</button>
-            <button type="button" class="btn btn-danger" (click)="deleteMatch()">🗑️ Xóa</button>
+            <div class="modal-body">
+              <form>
+                <!-- Date and Score Section -->
+                <div class="form-section">
+                  <h4>Thông tin trận đấu</h4>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="edit-date">Ngày thi đấu</label>
+                      <input id="edit-date" type="date" [(ngModel)]="editFormData.date" name="date" class="form-control">
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="edit-scoreA">Tỷ số Đội Xanh</label>
+                      <input id="edit-scoreA" type="number" [(ngModel)]="editFormData.scoreA" name="scoreA" class="form-control" min="0">
+                    </div>
+                    <div class="form-group">
+                      <label for="edit-scoreB">Tỷ số Đội Cam</label>
+                      <input id="edit-scoreB" type="number" [(ngModel)]="editFormData.scoreB" name="scoreB" class="form-control" min="0">
+                    </div>
+                  </div>
+                </div>
+                <!-- Scorers and Assists Section -->
+                <div class="form-section">
+                  <h4>Ghi bàn và Kiến tạo</h4>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="edit-scorerA">Ghi bàn Đội Xanh</label>
+                      <input id="edit-scorerA" type="text" [(ngModel)]="editFormData.scorerA" name="scorerA" class="form-control" placeholder="Tên cầu thủ ghi bàn">
+                    </div>
+                    <div class="form-group">
+                      <label for="edit-assistA">Kiến tạo Đội Xanh</label>
+                      <input id="edit-assistA" type="text" [(ngModel)]="editFormData.assistA" name="assistA" class="form-control" placeholder="Tên cầu thủ kiến tạo">
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="edit-scorerB">Ghi bàn Đội Cam</label>
+                      <input id="edit-scorerB" type="text" [(ngModel)]="editFormData.scorerB" name="scorerB" class="form-control" placeholder="Tên cầu thủ ghi bàn">
+                    </div>
+                    <div class="form-group">
+                      <label for="edit-assistB">Kiến tạo Đội Cam</label>
+                      <input id="edit-assistB" type="text" [(ngModel)]="editFormData.assistB" name="assistB" class="form-control" placeholder="Tên cầu thủ kiến tạo">
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="edit-ownGoalA">Phản lưới Đội Xanh</label>
+                      <input id="edit-ownGoalA" type="text" [(ngModel)]="editFormData.ownGoalA" name="ownGoalA" class="form-control" placeholder="Tên cầu thủ phản lưới">
+                    </div>
+                    <div class="form-group">
+                      <label for="edit-ownGoalB">Phản lưới Đội Cam</label>
+                      <input id="edit-ownGoalB" type="text" [(ngModel)]="editFormData.ownGoalB" name="ownGoalB" class="form-control" placeholder="Tên cầu thủ phản lưới">
+                    </div>
+                  </div>
+                </div>
+                <!-- Cards Section -->
+                <div class="form-section">
+                  <h4>Thẻ phạt</h4>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="edit-yellowA">Thẻ vàng Đội Xanh</label>
+                      <input id="edit-yellowA" type="text" [(ngModel)]="editFormData.yellowA" name="yellowA" class="form-control" placeholder="Danh sách cầu thủ nhận thẻ vàng">
+                    </div>
+                    <div class="form-group">
+                      <label for="edit-yellowB">Thẻ vàng Đội Cam</label>
+                      <input id="edit-yellowB" type="text" [(ngModel)]="editFormData.yellowB" name="yellowB" class="form-control" placeholder="Danh sách cầu thủ nhận thẻ vàng">
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="edit-redA">Thẻ đỏ Đội Xanh</label>
+                      <input id="edit-redA" type="text" [(ngModel)]="editFormData.redA" name="redA" class="form-control" placeholder="Danh sách cầu thủ nhận thẻ đỏ">
+                    </div>
+                    <div class="form-group">
+                      <label for="edit-redB">Thẻ đỏ Đội Cam</label>
+                      <input id="edit-redB" type="text" [(ngModel)]="editFormData.redB" name="redB" class="form-control" placeholder="Danh sách cầu thủ nhận thẻ đỏ">
+                    </div>
+                  </div>
+                </div>
+                <!-- Financial Section -->
+                <div class="form-section">
+                  <h4>Tài chính</h4>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="edit-thu">Tổng thu (đ)</label>
+                      <input id="edit-thu" type="number" [(ngModel)]="editFormData.thu" name="thu" class="form-control" min="0">
+                    </div>
+                    <div class="form-group">
+                      <label for="edit-chi_total">Tổng chi (đ)</label>
+                      <input id="edit-chi_total" type="number" [(ngModel)]="editFormData.chi_total" name="chi_total" class="form-control" min="0">
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="edit-chi_san">Chi sân (đ)</label>
+                      <input id="edit-chi_san" type="number" [(ngModel)]="editFormData.chi_san" name="chi_san" class="form-control" min="0">
+                    </div>
+                    <div class="form-group">
+                      <label for="edit-chi_trongtai">Chi trọng tài (đ)</label>
+                      <input id="edit-chi_trongtai" type="number" [(ngModel)]="editFormData.chi_trongtai" name="chi_trongtai" class="form-control" min="0">
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="edit-chi_nuoc">Chi nước (đ)</label>
+                      <input id="edit-chi_nuoc" type="number" [(ngModel)]="editFormData.chi_nuoc" name="chi_nuoc" class="form-control" min="0">
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" (click)="cancelEdit()">Hủy</button>
+              <button type="button" class="btn btn-primary" (click)="saveEditedMatch()">💾 Lưu thay đổi</button>
+            </div>
           </div>
         </div>
-      </div>
+      }
+    
+      <!-- Delete Confirmation Modal -->
+      @if (showDeleteModal && canEdit) {
+        <div class="modal-overlay" (click)="cancelDelete()" tabindex="0" (keydown)="onOverlayKey($event)">
+          <div class="modal-content delete-modal" (click)="$event.stopPropagation()" tabindex="0" (keydown)="onModalKey($event)">
+            <div class="modal-header">
+              <h3>🗑️ Xác nhận xóa</h3>
+              <button class="close-btn" (click)="cancelDelete()">&times;</button>
+            </div>
+            <div class="modal-body">
+              <p>Bạn có chắc chắn muốn xóa trận đấu này không?</p>
+              @if (matchToDelete) {
+                <div class="match-info">
+                  <strong>Ngày:</strong> {{ formatMatchDate(matchToDelete.date) }}<br>
+                  <strong>Tỷ số:</strong> {{ matchToDelete.scoreA || 0 }} - {{ matchToDelete.scoreB || 0 }}
+                </div>
+              }
+              <p class="warning-text">⚠️ Hành động này không thể hoàn tác!</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" (click)="cancelDelete()">Hủy</button>
+              <button type="button" class="btn btn-danger" (click)="deleteMatch()">🗑️ Xóa</button>
+            </div>
+          </div>
+        </div>
+      }
     </div>
-  `,
+    `,
   styleUrls: ['./history.component.css'],
   styles: [`
     /* Modern Base Styles */
