@@ -32,7 +32,9 @@ import { ToastService } from '../core/services/toast.service';
         <a
           class="nav-link"
           [routerLink]="link.path"
+          #navItem
           routerLinkActive="active"
+          (isActiveChange)="$event && navItem.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' })"
           [routerLinkActiveOptions]="link.exact ? { exact: true } : {}"
           [attr.aria-label]="link.label"
           [attr.aria-current]="isLinkActive(link.path) ? 'page' : null">

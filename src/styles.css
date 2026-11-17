@@ -590,8 +590,8 @@ app-root {
   }
 
   .container {
-    margin: var(--space-2);
-    padding: var(--space-4);
+    margin: var(--space-2) 0;
+    padding: var(--space-2);
     border-radius: var(--border-radius-lg);
   }
   
@@ -666,8 +666,11 @@ app-root {
   }
 
   .container {
-    margin: var(--space-1);
-    padding: var(--space-3);
+    margin: var(--space-1) 0;
+    padding: var(--space-1);
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
   }
 
   .navigation-buttons {
@@ -1059,4 +1062,19 @@ app-history,
 
 .will-change-auto {
   will-change: auto;
+}
+
+/* ===== Mobile / touch enhancements ===== */
+@media (max-width: 768px) {
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  img, video { max-width: 100%; }
+  /* Respect device notches / home indicator */
+  body { padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
+  .container { padding-bottom: calc(var(--space-2) + env(safe-area-inset-bottom)); }
+  /* must come after the base .content-area rule to win */
+  .container .content-area { margin-top: var(--space-1); padding: 0; }
+}
+@media (pointer: coarse) {
+  /* iOS zooms into inputs with a font size below 16px */
+  input:not([type='checkbox']):not([type='radio']), select, textarea { font-size: max(16px, 1em); }
 }

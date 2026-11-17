@@ -2119,3 +2119,16 @@
   transform: scale(1.1);
   color: #5a67d8;
 }
+
+/* ===== Compact overview cards on phones: 2 per row ===== */
+@media (max-width: 600px) {
+  .stats-overview-grid { grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .stats-overview-card { padding: 14px 12px 12px; border-radius: 16px; min-width: 0; }
+  .stats-overview-card:hover { transform: none; }
+  .stats-overview-card .card-icon-wrapper { width: 40px; height: 40px; margin-bottom: 8px; border-radius: 12px; }
+  .stats-overview-card .card-icon { font-size: 1.25rem; }
+  .stats-overview-card .card-label { font-size: 0.7rem; letter-spacing: .5px; margin-bottom: 2px; }
+  .stats-overview-card .card-value { font-size: 1.8rem; line-height: 1.1; margin-bottom: 4px; }
+  .stats-overview-card .card-subtitle { font-size: 0.72rem; gap: 4px; flex-wrap: wrap; }
+  .stats-overview-card .card-decoration { display: none; }
+}

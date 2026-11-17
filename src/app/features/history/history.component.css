@@ -642,3 +642,27 @@
     font-size: 0.85rem;
   }
 }
+
+/* ===== Mobile match rows (<= 600px) ===== */
+@media (max-width: 600px) {
+  .match-header-clickable .match-summary { flex-wrap: wrap; gap: 8px 12px; min-width: 0; }
+  .match-header-clickable .match-date-inline { min-width: 0; flex: 1 1 auto; }
+  .match-header-clickable .score-summary { order: 3; flex: 1 1 100%; justify-content: center; flex-wrap: wrap; gap: 8px; }
+  .match-header-clickable .match-actions-inline { margin-left: auto; }
+  .match-header-clickable .action-btn-small { min-width: 40px; min-height: 40px; }
+}
+
+/* ===== Compact financial cards on phones ===== */
+@media (max-width: 600px) {
+  .financial-cards-grid { gap: 10px; }
+  .financial-cards-grid .financial-card { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 16px; }
+  .financial-cards-grid .financial-card:hover { transform: none; }
+  .financial-cards-grid .card-icon-wrapper { flex: 0 0 52px; width: 52px; height: 52px; margin: 0; border-radius: 14px; }
+  .financial-cards-grid .card-icon-wrapper i { font-size: 1.3rem; }
+  .financial-cards-grid .card-content { min-width: 0; }
+  .financial-cards-grid .card-label { font-size: 0.72rem; margin-bottom: 2px; letter-spacing: .6px; }
+  .financial-cards-grid .card-value { font-size: 1.5rem; line-height: 1.15; overflow-wrap: anywhere; }
+  .financial-cards-grid .card-subtitle { font-size: 0.78rem; }
+  .financial-cards-grid .card-decoration { display: none; }
+  .financial-overview-section .section-title, .financial-overview-section h2 { font-size: 1.3rem; }
+}

@@ -879,3 +879,17 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ===== Compact summary cards on phones ===== */
+@media (max-width: 600px) {
+  .fund-dashboard { padding: 10px; }
+  .header-content { padding: 16px; }
+  .summary-grid { gap: 10px; margin-bottom: 20px; }
+  .summary-card { padding: 16px 18px; border-radius: 16px; }
+  .summary-card:hover { transform: none; }
+  .summary-card .card-header { margin-bottom: 8px; gap: 10px; }
+  .summary-card .card-icon { font-size: 1.5rem; }
+  .summary-card .card-title { font-size: 0.8rem; letter-spacing: .6px; }
+  .summary-card .main-value { font-size: 1.9rem; margin-bottom: 6px; overflow-wrap: anywhere; }
+  .summary-card .card-subtitle { font-size: 0.85rem; }
+}

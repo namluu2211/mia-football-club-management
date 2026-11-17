@@ -864,3 +864,22 @@
       grid-template-columns: 1fr;
     }
   }
+
+  /* ===== Mobile (<= 520px) ===== */
+  @media (max-width: 520px) {
+    .search-box { min-width: 0; flex: 1 1 100%; }
+    /* the count pill covered the placeholder; show it under the field instead */
+    .search-hint {
+      position: static;
+      transform: none;
+      width: fit-content;
+      margin: 8px 0 0 12px;
+    }
+    .table-header-info { padding: 14px 16px; }
+    .table-title { font-size: 1.05rem; }
+    .pagination-bar { padding: 14px 10px; gap: 8px; }
+    .page-btn { min-width: 44px; height: 44px; }
+    .table-container { border-radius: 14px; }
+    /* contain horizontal scrolling of the wide table inside its card, never the whole page */
+    .table-wrapper { max-height: none; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; }
+  }

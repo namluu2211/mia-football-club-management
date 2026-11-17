@@ -537,39 +537,49 @@
 
   /* Responsive Design */
   @media (max-width: 768px) {
+    /* Two rows: [logo ... login] then a single horizontally scrollable row of tabs */
     .header-container {
-      padding: 0 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      row-gap: 4px;
+      padding: 8px 10px 0;
     }
-
-    .logo-section {
-      gap: 8px;
+    .logo-section { order: 1; flex: 1 1 auto; min-width: 0; gap: 8px; }
+    .ai-mode-badge { order: 2; margin-right: 8px; padding: 4px 8px; font-size: 11px; }
+    .auth-section { order: 3; flex: 0 0 auto; }
+    .nav-links {
+      order: 4;
+      flex: 0 0 calc(100% + 20px);
+      margin: 0 -10px;
+      padding: 4px 10px 8px;
+      gap: 6px;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x proximity;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      /* fade hints that more tabs are scrollable */
+      -webkit-mask-image: linear-gradient(to right, transparent 0, #000 10px, #000 calc(100% - 18px), transparent 100%);
+      mask-image: linear-gradient(to right, transparent 0, #000 10px, #000 calc(100% - 18px), transparent 100%);
     }
-
-    .logo-icon {
-      width: 40px;
-      height: 40px;
-      font-size: 16px;
+    .nav-links::-webkit-scrollbar { display: none; }
+    .nav-link {
+      flex: 0 0 auto;
+      white-space: nowrap;
+      min-height: 40px;
+      padding: 8px 14px;
+      scroll-snap-align: center;
     }
-
-    .logo-main {
-      font-size: 1.2rem;
-    }
-
-    .logo-subtitle {
-      display: none;
-    }
-
-    .login-form {
-      width: 90vw;
-      padding: 16px;
-    }
-
-    .user-details {
-      display: none;
-    }
-
-    .user-dropdown {
-      right: -8px;
-      min-width: 200px;
-    }
+    .logo-icon { width: 36px; height: 36px; font-size: 15px; }
+    .logo-main { font-size: 1.1rem; white-space: nowrap; }
+    .logo-subtitle { display: none; }
+    .login-toggle-btn { min-height: 40px; padding: 8px 12px; }
+    .login-form { width: 90vw; padding: 16px; }
+    .user-details { display: none; }
+    .user-dropdown { right: -8px; min-width: 200px; }
+  }
+  @media (max-width: 360px) {
+    .logo-main { font-size: 1rem; }
+    .nav-link { padding: 8px 10px; font-size: 13px; }
   }

@@ -119,7 +119,21 @@ import { Player } from '../player-utils';
     .empty .icon { font-size:2.4rem; margin-bottom:12px; opacity:.65; }
   @media (max-width:900px){ .players-grid4 { grid-template-columns:repeat(3,1fr); } }
   @media (max-width:680px){ .players-grid4 { grid-template-columns:repeat(2,1fr); } }
-  @media (max-width:460px){ .players-grid4 { grid-template-columns:1fr; } }
+  @media (max-width:460px){
+    .player-list-section { padding:6px 0 4px; }
+    .player-list-card.light { padding:10px 8px 8px; }
+    /* the page already shows a "Danh sách cầu thủ" heading with its own collapse button */
+    .list-header { display:none; }
+    .players-grid4 { gap:8px; }
+    .player-cell { padding:8px 8px 8px; }
+    .register-toggle { width:36px; height:36px; font-size:16px; }
+    .name { font-size:.85rem; }
+    .position { font-size:.68rem; }
+    .reg-badge { font-size:.62rem; padding:2px 8px; align-self:flex-start; }
+    .legend-row { font-size:.7rem; }
+    .pagination-controls .btn { min-width:44px; min-height:44px; }
+  }
+  @media (max-width:330px){ .players-grid4 { grid-template-columns:1fr; } }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
