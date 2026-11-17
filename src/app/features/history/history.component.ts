@@ -6,6 +6,8 @@ import { FormsModule } from '@angular/forms';
 import { PermissionService } from '../../core/services/permission.service';
 import { CanEditDirective } from '../../shared/can-edit.directive';
 import { FirebaseAuthService } from '../../services/firebase-auth.service';
+import { downloadCsv } from '../../utils/csv.utils';
+import { historyToCsv } from './history-csv';
 import { Router } from '@angular/router';
 
 @Component({
@@ -45,6 +47,10 @@ import { Router } from '@angular/router';
             <button class="action-button export-btn" (click)="exportData()">
               <i class="fas fa-file-export"></i>
               <span>Xuất dữ liệu</span>
+            </button>
+            <button class="action-button export-btn" (click)="exportCsv()" [disabled]="filteredMatches.length === 0" title="Xuất CSV (mở bằng Excel)">
+              <i class="fas fa-file-csv"></i>
+              <span>Xuất CSV</span>
             </button>
           </div>
         </div>
@@ -2560,6 +2566,10 @@ export class HistoryComponent implements OnInit, OnDestroy {
     } finally {
       this.isSyncingFund = false;
     }
+  }
+
+  exportCsv(): void {
+    downloadCsv(`thanglong_fc_history_${new Date().toISOString().split('T')[0]}.csv`, historyToCsv(this.filteredMatches));
   }
 
   exportData(): void {
