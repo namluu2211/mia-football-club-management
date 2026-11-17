@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { PermissionService, AuthState } from '../permission.service';
+import { PermissionService } from '../permission.service';
 
 /**
  * Unit tests for PermissionService

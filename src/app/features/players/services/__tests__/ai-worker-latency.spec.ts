@@ -1,3 +1,4 @@
+import { TestBed } from '@angular/core/testing';
 import { AIWorkerService } from '../ai-worker.service';
 // Worker will be mocked for deterministic timing.
 
@@ -26,7 +27,7 @@ class InstantWorker {
 describe('AIWorkerService latency', () => {
   let service: AIWorkerService;
   beforeEach(() => {
-    service = new AIWorkerService();
+    service = TestBed.runInInjectionContext(() => new AIWorkerService());
   });
 
   it('records perf marks for worker path', (done) => {

@@ -10,15 +10,16 @@ interface PerfMeasureResult {
 @Injectable({ providedIn: 'root' })
 export class PerfMarksService {
   private measures: PerfMeasureResult[] = [];
+  private seq = 0;
 
   markStart(label: string): string {
-    const id = `${label}-start-${Date.now()}`;
+    const id = `${label}-start-${Date.now()}-${this.seq++}`;
     performance.mark(id);
     return id;
   }
 
   markEnd(label: string, startId: string): PerfMeasureResult | null {
-    const endId = `${label}-end-${Date.now()}`;
+    const endId = `${label}-end-${Date.now()}-${this.seq++}`;
     performance.mark(endId);
     try {
       performance.measure(label, startId, endId);

@@ -1,17 +1,19 @@
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 @Component({
   selector: 'app-loading-overlay',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="loading-overlay" *ngIf="show" role="status" aria-live="polite" aria-label="Đang tải dữ liệu">
-      <div class="spinner"></div>
-      <div class="message">Đang tải dữ liệu...</div>
-    </div>
-  `,
+    @if (show) {
+      <div class="loading-overlay" role="status" aria-live="polite" aria-label="Đang tải dữ liệu">
+        <div class="spinner"></div>
+        <div class="message">Đang tải dữ liệu...</div>
+      </div>
+    }
+    `,
   styles: [`
     .loading-overlay { position: fixed; inset: 0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(15,23,42,0.55); backdrop-filter:blur(6px); z-index:2000; }
     .spinner { width:64px; height:64px; border-radius:50%; border:6px solid rgba(255,255,255,0.15); border-top-color:#3b82f6; animation: spin 1s linear infinite; box-shadow:0 0 0 4px rgba(255,255,255,0.05); }

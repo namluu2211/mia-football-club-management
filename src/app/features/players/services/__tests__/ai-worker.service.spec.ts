@@ -1,3 +1,4 @@
+import { TestBed } from '@angular/core/testing';
 import { AIWorkerService } from '../ai-worker.service';
 
 interface MockTeamPlayer { id: number; firstName: string }
@@ -42,7 +43,7 @@ class MockWorker {
 describe('AIWorkerService', () => {
   let service: AIWorkerService;
   beforeEach(() => {
-    service = new AIWorkerService();
+    service = TestBed.runInInjectionContext(() => new AIWorkerService());
   });
 
   it('should return analysis result observable', (done) => {

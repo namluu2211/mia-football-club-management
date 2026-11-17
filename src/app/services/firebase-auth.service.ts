@@ -1,13 +1,6 @@
 import { Injectable } from '@angular/core';
 import { initializeApp, getApps } from 'firebase/app';
-import { 
-  getAuth, 
-  signInWithEmailAndPassword, 
-  signOut, 
-  onAuthStateChanged,
-  User,
-  Auth
-} from 'firebase/auth';
+import type { User, Auth } from 'firebase/auth';
 import { BehaviorSubject } from 'rxjs';
 import { firebaseConfig } from '../config/firebase.config';
 import { AdminConfig, ADMIN_EMAILS, SUPER_ADMIN_EMAILS } from '../config/admin.config';
@@ -25,7 +18,9 @@ export interface AuthUser {
 })
 export class FirebaseAuthService {
   private app = getApps().length > 0 ? getApps()[0] : initializeApp(firebaseConfig);
-  private auth: Auth = getAuth(this.app);
+  /** firebase/auth (~75 KB) is fetched on first use so it stays out of the initial bundle. */
+  private authReady: Promise<{ auth: Auth; api: typeof import('firebase/auth') }> = import('firebase/auth')
+    .then(api => ({ api, auth: api.getAuth(this.app) }));
   
   private currentUserSubject = new BehaviorSubject<AuthUser | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
@@ -36,14 +31,16 @@ export class FirebaseAuthService {
 
   constructor() {
     // Listen for auth state changes
-    onAuthStateChanged(this.auth, (firebaseUser) => {
+    this.authReady
+      .then(({ auth, api }) => api.onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
         const authUser = this.createAuthUser(firebaseUser);
         this.currentUserSubject.next(authUser);
       } else {
         this.currentUserSubject.next(null);
       }
-    });
+      }))
+      .catch(err => console.error('Firebase auth failed to load:', err));
   }
 
   private createAuthUser(firebaseUser: User): AuthUser {
@@ -67,20 +64,16 @@ export class FirebaseAuthService {
 
   async signInWithEmail(email: string, password: string): Promise<AuthUser | null> {
     try {
-      console.log('🔍 Attempting login with email:', email);
-      console.log('📧 Admin emails list:', this.adminEmails);
-      console.log('🔐 Is admin email?', this.isAdminEmail(email));
       
-      const userCredential = await signInWithEmailAndPassword(this.auth, email, password);
+      const { auth, api } = await this.authReady;
+      const userCredential = await api.signInWithEmailAndPassword(auth, email, password);
       const authUser = this.createAuthUser(userCredential.user);
       
       console.log('✅ Firebase auth successful for:', email);
-      console.log('👤 Auth user created:', authUser);
       
       // Only allow admin users to sign in
       if (!authUser.isAdmin) {
         console.error('❌ User is not admin:', email);
-        console.log('📧 Available admin emails:', this.adminEmails);
         await this.signOut();
         throw new Error(`Unauthorized: ${email} is not in the admin list. Contact administrator to add your email to the system.`);
       }
@@ -102,7 +95,8 @@ export class FirebaseAuthService {
 
   async signOut(): Promise<void> {
     try {
-      await signOut(this.auth);
+      const { auth, api } = await this.authReady;
+      await api.signOut(auth);
     } catch (error) {
       console.error('Sign out error:', error);
       throw error;

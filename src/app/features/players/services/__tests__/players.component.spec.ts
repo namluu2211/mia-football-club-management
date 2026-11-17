@@ -1,11 +1,4 @@
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
-// Declare Jasmine globals to satisfy TypeScript without installing types in this context
-// (Assuming Jasmine/Karma environment; adjust if using Jest)
-declare const describe: any; // eslint-disable-line @typescript-eslint/no-explicit-any
-declare const it: any; // eslint-disable-line @typescript-eslint/no-explicit-any
-declare const expect: any; // eslint-disable-line @typescript-eslint/no-explicit-any
-declare const beforeEach: any; // eslint-disable-line @typescript-eslint/no-explicit-any
-declare const spyOn: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 import { PlayersComponent } from '../../players.component';
 import { AIAnalysisService } from '../ai-analysis.service';
 import { FirebasePlayerService } from '../../../../core/services/firebase-player.service';
@@ -18,7 +11,10 @@ class MockAIAnalysisService { analyzeTeams(){ return { prediction:{ predictedSco
 class MockFirebasePlayerService { players$=of([]); getAllPlayers(){ return []; } }
 class MockMatchService { completedMatches$=of([]); createMatch(){ return Promise.resolve(); } }
 class MockDataStoreService { addFundTransaction(){ return Promise.resolve(); } }
-class MockLoggerService { log() { /* noop */ } warn() { /* noop */ } error() { /* noop */ } }
+class MockLoggerService {
+  log() { /* noop */ } debug() { /* noop */ } info() { /* noop */ } warn() { /* noop */ } error() { /* noop */ }
+  debugDev() { /* noop */ } infoDev() { /* noop */ } warnDev() { /* noop */ } errorDev() { /* noop */ } success() { /* noop */ }
+}
 
 describe('PlayersComponent', () => {
   let component: PlayersComponent;
@@ -49,15 +45,15 @@ describe('PlayersComponent', () => {
     expect(third).not.toBe(first);
   });
 
-  it('should debounce AI analysis calls', fakeAsync(() => {
+  it('should not auto-run AI analysis on team changes (manual trigger only)', fakeAsync(() => {
     // Access private method via type assertion
-  spyOn(component as unknown as { runAIAnalysis: () => void }, 'runAIAnalysis').and.callThrough();
+  jest.spyOn(component as unknown as { runAIAnalysis: () => void }, 'runAIAnalysis');
     component.teamA=[{ id:1, firstName:'A', lastName:'', position:'', DOB:0, height:0, weight:0, avatar:'', note:'' }];
     component.teamB=[{ id:2, firstName:'B', lastName:'', position:'', DOB:0, height:0, weight:0, avatar:'', note:'' }];
     (component as unknown as { triggerTeamChange: () => void }).triggerTeamChange();
     (component as unknown as { triggerTeamChange: () => void }).triggerTeamChange();
     (component as unknown as { triggerTeamChange: () => void }).triggerTeamChange();
-    tick(260); // exceed debounce time
-  expect((component as unknown as { runAIAnalysis: () => void }).runAIAnalysis).toHaveBeenCalledTimes(1);
+    tick(600);
+  expect((component as unknown as { runAIAnalysis: () => void }).runAIAnalysis).not.toHaveBeenCalled();
   }));
 });

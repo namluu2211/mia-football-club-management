@@ -210,29 +210,6 @@ export function dividePlayersByPositionWithAgeBalance(players: Player[]): TeamDi
     }
   });
 
-  // Calculate final statistics
-  let teamAAge = 0, teamAValidAges = 0;
-  let teamBAge = 0, teamBValidAges = 0;
-
-  for (const player of teamA) {
-    const age = calculateAge(player.DOB);
-    if (age !== null && age > 0) {
-      teamAAge += age;
-      teamAValidAges++;
-    }
-  }
-
-  for (const player of teamB) {
-    const age = calculateAge(player.DOB);
-    if (age !== null && age > 0) {
-      teamBAge += age;
-      teamBValidAges++;
-    }
-  }
-
-  const teamAAvgAge = teamAValidAges > 0 ? Math.round((teamAAge / teamAValidAges) * 10) / 10 : 0;
-  const teamBAvgAge = teamBValidAges > 0 ? Math.round((teamBAge / teamBValidAges) * 10) / 10 : 0;
-  const ageDiff = Math.abs(teamAAvgAge - teamBAvgAge);
 
   console.log('\n⚖️  CÂN BẰNG SỐ LƯỢNG CẦU THỦ:');
   console.log(`  Trước: Team A = ${teamA.length}, Team B = ${teamB.length}`);
@@ -291,11 +268,9 @@ export function dividePlayersByPositionWithAgeBalance(players: Player[]): TeamDi
 
   console.log(`  Sau: Team A = ${teamA.length}, Team B = ${teamB.length}`);
 
-  // Recalculate ages after balancing
-  teamAAge = 0;
-  teamAValidAges = 0;
-  teamBAge = 0;
-  teamBValidAges = 0;
+  // Calculate ages after balancing
+  let teamAAge = 0, teamAValidAges = 0;
+  let teamBAge = 0, teamBValidAges = 0;
 
   for (const player of teamA) {
     const age = calculateAge(player.DOB);

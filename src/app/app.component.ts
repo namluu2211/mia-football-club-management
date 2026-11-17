@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { FirebaseService, HistoryEntry } from './services/firebase.service';
 import { PerformanceService } from './services/performance.service';
@@ -21,28 +21,29 @@ import { PermissionService } from './core/services/permission.service';
   selector: 'app-root',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     FormsModule,
     FooterComponent,
     LoadingOverlayComponent,
     ToastContainerComponent,
     HeaderComponent,
     RouterOutlet
-  ],
+],
   template: `
   <app-header (loginChange)="onLoginChange($event)"></app-header>
   <app-loading-overlay [show]="globalLoading"></app-loading-overlay>
   <app-toast-container></app-toast-container>
-    <div class="container">
-      <div class="hline"></div>
-      <div class="content-area fade-in">
-        <router-outlet></router-outlet>
-      </div>
-      <div *ngIf="!loggedIn" class="small">Bạn đang xem ở chế độ khách. Đăng nhập để chỉnh sửa hoặc lưu dữ liệu.</div>
+  <div class="container">
+    <div class="hline"></div>
+    <div class="content-area fade-in">
+      <router-outlet></router-outlet>
     </div>
-    
-    <!-- Footer -->
-    <app-footer></app-footer>
+    @if (!loggedIn) {
+      <div class="small">Bạn đang xem ở chế độ khách. Đăng nhập để chỉnh sửa hoặc lưu dữ liệu.</div>
+    }
+  </div>
+  
+  <!-- Footer -->
+  <app-footer></app-footer>
   `
 })
 export class AppComponent implements OnInit, OnDestroy {

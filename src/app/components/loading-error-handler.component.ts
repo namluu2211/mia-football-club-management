@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
+
 import { Subject, BehaviorSubject } from 'rxjs';
 
 export interface LoadingState {
@@ -18,91 +19,102 @@ export interface ErrorState {
 @Component({
   selector: 'app-loading-error-handler',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <!-- Loading Overlay -->
-    <div *ngIf="loadingState.isLoading" class="loading-overlay">
-      <div class="loading-content">
-        <div class="loading-spinner-container">
-          <div class="loading-spinner"></div>
-          <div class="loading-progress" *ngIf="loadingState.progress !== undefined">
-            <div class="progress-bar">
-              <div 
-                class="progress-fill" 
-                [style.width.%]="loadingState.progress">
+    @if (loadingState.isLoading) {
+      <div class="loading-overlay">
+        <div class="loading-content">
+          <div class="loading-spinner-container">
+            <div class="loading-spinner"></div>
+            @if (loadingState.progress !== undefined) {
+              <div class="loading-progress">
+                <div class="progress-bar">
+                  <div
+                    class="progress-fill"
+                    [style.width.%]="loadingState.progress">
+                  </div>
+                </div>
+                <span class="progress-text">{{loadingState.progress}}%</span>
               </div>
-            </div>
-            <span class="progress-text">{{loadingState.progress}}%</span>
+            }
+          </div>
+          <p class="loading-message">
+            {{loadingState.operation || 'Đang tải...'}}
+          </p>
+        </div>
+      </div>
+    }
+    
+    <!-- Error Notification -->
+    @if (errorState.hasError) {
+      <div
+        class="error-notification"
+        [class.error-slide-in]="errorState.hasError">
+        <div class="error-content">
+          <div class="error-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+          </div>
+          <div class="error-details">
+            <h4 class="error-title">Có lỗi xảy ra</h4>
+            <p class="error-message">{{errorState.message || 'Đã xảy ra lỗi không xác định'}}</p>
+            @if (errorState.code) {
+              <small class="error-code">
+                Mã lỗi: {{errorState.code}}
+              </small>
+            }
+          </div>
+          <div class="error-actions">
+            <button
+              class="btn btn-sm btn-outline-danger"
+              (click)="dismissError()">
+              <i class="fas fa-times"></i>
+            </button>
+            @if (showRetry) {
+              <button
+                class="btn btn-sm btn-primary"
+                (click)="retryOperation()"
+                >
+                <i class="fas fa-redo"></i>
+                Thử lại
+              </button>
+            }
           </div>
         </div>
-        <p class="loading-message">
-          {{loadingState.operation || 'Đang tải...'}}
-        </p>
       </div>
-    </div>
-
-    <!-- Error Notification -->
-    <div 
-      *ngIf="errorState.hasError" 
-      class="error-notification"
-      [class.error-slide-in]="errorState.hasError">
-      <div class="error-content">
-        <div class="error-icon">
-          <i class="fas fa-exclamation-triangle"></i>
-        </div>
-        <div class="error-details">
-          <h4 class="error-title">Có lỗi xảy ra</h4>
-          <p class="error-message">{{errorState.message || 'Đã xảy ra lỗi không xác định'}}</p>
-          <small class="error-code" *ngIf="errorState.code">
-            Mã lỗi: {{errorState.code}}
-          </small>
-        </div>
-        <div class="error-actions">
-          <button 
-            class="btn btn-sm btn-outline-danger"
-            (click)="dismissError()">
+    }
+    
+    <!-- Success Notification -->
+    @if (successMessage) {
+      <div
+        class="success-notification"
+        [class.success-slide-in]="successMessage">
+        <div class="success-content">
+          <div class="success-icon">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <div class="success-message">
+            {{successMessage}}
+          </div>
+          <button
+            class="btn btn-sm btn-outline-success"
+            (click)="dismissSuccess()">
             <i class="fas fa-times"></i>
           </button>
-          <button 
-            class="btn btn-sm btn-primary"
-            (click)="retryOperation()"
-            *ngIf="showRetry">
-            <i class="fas fa-redo"></i>
-            Thử lại
-          </button>
         </div>
       </div>
-    </div>
-
-    <!-- Success Notification -->
-    <div 
-      *ngIf="successMessage" 
-      class="success-notification"
-      [class.success-slide-in]="successMessage">
-      <div class="success-content">
-        <div class="success-icon">
-          <i class="fas fa-check-circle"></i>
-        </div>
-        <div class="success-message">
-          {{successMessage}}
-        </div>
-        <button 
-          class="btn btn-sm btn-outline-success"
-          (click)="dismissSuccess()">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-    </div>
-
+    }
+    
     <!-- Connection Status -->
-    <div 
-      *ngIf="!isOnline" 
-      class="connection-status offline">
-      <i class="fas fa-wifi"></i>
-      Mất kết nối internet - Đang sử dụng dữ liệu offline
-    </div>
-  `,
+    @if (!isOnline) {
+      <div
+        class="connection-status offline">
+        <i class="fas fa-wifi"></i>
+        Mất kết nối internet - Đang sử dụng dữ liệu offline
+      </div>
+    }
+    `,
   styles: [`
     /* Loading Overlay */
     .loading-overlay {
@@ -474,7 +486,7 @@ export class LoadingErrorHandlerComponent implements OnInit, OnDestroy {
 @Component({
   selector: 'app-global-state-manager',
   standalone: true,
-  imports: [CommonModule, LoadingErrorHandlerComponent],
+  imports: [LoadingErrorHandlerComponent, AsyncPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-loading-error-handler

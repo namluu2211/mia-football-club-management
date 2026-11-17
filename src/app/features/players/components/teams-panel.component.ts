@@ -1,66 +1,81 @@
 import { Component, ChangeDetectionStrategy, ChangeDetectorRef, Input, Output, EventEmitter, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { DragDropModule, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Player, calculateAge } from '../player-utils';
 
 @Component({
   selector: 'app-teams-panel',
   standalone: true,
-  imports: [CommonModule, DragDropModule],
+  imports: [DragDropModule],
   template: `
-    <div class="teams-container" *ngIf="teamA || teamB">
-      <div class="teams-row">
-        <div class="balance-badge" *ngIf="teamA.length && teamB.length">
-          <span>⚖️ Cân bằng: <strong>{{ balanceScore() }}%</strong></span>
-        </div>
-        
-        <div class="team-card">
-          <div class="team-header team-a">
-            <h3>
-              🔵 Đội Xanh
-              <span class="count-badge" [attr.aria-label]="'Số cầu thủ đội xanh: ' + teamA.length">{{teamA.length}}</span>
-              <span class="strength-badge" title="Sức mạnh tương đối">⚡ {{ teamStrength(teamA) }}</span>
-              <span class="age-badge" title="Trung bình độ tuổi" *ngIf="teamA.length > 0">🎂 {{ getTeamAverageAge() }} tuổi</span>
-            </h3>
-          </div>
-          <div class="team-content">
-            <h4 class="section-title players-title">Cầu thủ</h4>
-            <div cdkDropList id="teamAList" [cdkDropListData]="teamA" [cdkDropListConnectedTo]="['teamBList']" (cdkDropListDropped)="dropped($event)" class="players-row team-players" aria-label="Khu vực Đội Xanh">
-              <div class="placeholder" *ngIf="!teamA.length">Kéo cầu thủ vào đây</div>
-              <div *ngFor="let player of teamA; trackBy: trackByPlayerId" cdkDrag class="player-card team-member" [attr.aria-label]="player.firstName">
-                <div class="drag-handle" cdkDragHandle title="Kéo để chuyển đội" aria-label="Kéo để chuyển đội">⋮⋮</div>
-                <img [src]="player.avatar || 'assets/images/default-avatar.svg'" (error)="onAvatarError($event)" class="player-avatar" [alt]="player.firstName" [title]="'Avatar: ' + (player.avatar || 'NO AVATAR')" loading="lazy" />
-                <span class="player-name">{{player.firstName}}</span>
-                <span style="font-size: 0.7rem; color: #666; font-weight: 600;">{{getPlayerAge(player)}} tuổi</span>
+    @if (teamA || teamB) {
+      <div class="teams-container">
+        <div class="teams-row">
+          @if (teamA.length && teamB.length) {
+            <div class="balance-badge">
+              <span>⚖️ Cân bằng: <strong>{{ balanceScore() }}%</strong></span>
+            </div>
+          }
+          <div class="team-card">
+            <div class="team-header team-a">
+              <h3>
+                🔵 Đội Xanh
+                <span class="count-badge" [attr.aria-label]="'Số cầu thủ đội xanh: ' + teamA.length">{{teamA.length}}</span>
+                <span class="strength-badge" title="Sức mạnh tương đối">⚡ {{ teamStrength(teamA) }}</span>
+                @if (teamA.length > 0) {
+                  <span class="age-badge" title="Trung bình độ tuổi">🎂 {{ getTeamAverageAge() }} tuổi</span>
+                }
+              </h3>
+            </div>
+            <div class="team-content">
+              <h4 class="section-title players-title">Cầu thủ</h4>
+              <div cdkDropList id="teamAList" [cdkDropListData]="teamA" [cdkDropListConnectedTo]="['teamBList']" (cdkDropListDropped)="dropped($event)" class="players-row team-players" aria-label="Khu vực Đội Xanh">
+                @if (!teamA.length) {
+                  <div class="placeholder">Kéo cầu thủ vào đây</div>
+                }
+                @for (player of teamA; track player.id) {
+                  <div cdkDrag class="player-card team-member" [attr.aria-label]="player.firstName">
+                    <div class="drag-handle" cdkDragHandle title="Kéo để chuyển đội" aria-label="Kéo để chuyển đội">⋮⋮</div>
+                    <img [src]="player.avatar || 'assets/images/default-avatar.svg'" (error)="onAvatarError($event)" class="player-avatar" [alt]="player.firstName" [title]="'Avatar: ' + (player.avatar || 'NO AVATAR')" loading="lazy" />
+                    <span class="player-name">{{player.firstName}}</span>
+                    <span style="font-size: 0.7rem; color: #666; font-weight: 600;">{{getPlayerAge(player)}} tuổi</span>
+                  </div>
+                }
               </div>
             </div>
           </div>
-        </div>
-        <div class="team-card">
-          <div class="team-header team-b">
-            <h3>
-              🟠 Đội Cam
-              <span class="count-badge" [attr.aria-label]="'Số cầu thủ đội cam: ' + teamB.length">{{teamB.length}}</span>
-              <span class="strength-badge" title="Sức mạnh tương đối">⚡ {{ teamStrength(teamB) }}</span>
-              <span class="age-badge" title="Trung bình độ tuổi" *ngIf="teamB.length > 0">🎂 {{ getTeamBAverageAge() }} tuổi</span>
-            </h3>
-          </div>
-          <div class="team-content">
-            <h4 class="section-title players-title">Cầu thủ</h4>
-            <div cdkDropList id="teamBList" [cdkDropListData]="teamB" [cdkDropListConnectedTo]="['teamAList']" (cdkDropListDropped)="dropped($event)" class="players-row team-players" aria-label="Khu vực Đội Cam">
-              <div class="placeholder" *ngIf="!teamB.length">Kéo cầu thủ vào đây</div>
-              <div *ngFor="let player of teamB; trackBy: trackByPlayerId" cdkDrag class="player-card team-member" [attr.aria-label]="player.firstName">
-                <div class="drag-handle" cdkDragHandle title="Kéo để chuyển đội" aria-label="Kéo để chuyển đội">⋮⋮</div>
-                <img [src]="player.avatar || 'assets/images/default-avatar.svg'" (error)="onAvatarError($event)" class="player-avatar" [alt]="player.firstName" [title]="'Avatar: ' + (player.avatar || 'NO AVATAR')" loading="lazy" />
-                <span class="player-name">{{player.firstName}}</span>
-                <span style="font-size: 0.7rem; color: #666; font-weight: 600;">{{getPlayerAge(player)}} tuổi</span>
+          <div class="team-card">
+            <div class="team-header team-b">
+              <h3>
+                🟠 Đội Cam
+                <span class="count-badge" [attr.aria-label]="'Số cầu thủ đội cam: ' + teamB.length">{{teamB.length}}</span>
+                <span class="strength-badge" title="Sức mạnh tương đối">⚡ {{ teamStrength(teamB) }}</span>
+                @if (teamB.length > 0) {
+                  <span class="age-badge" title="Trung bình độ tuổi">🎂 {{ getTeamBAverageAge() }} tuổi</span>
+                }
+              </h3>
+            </div>
+            <div class="team-content">
+              <h4 class="section-title players-title">Cầu thủ</h4>
+              <div cdkDropList id="teamBList" [cdkDropListData]="teamB" [cdkDropListConnectedTo]="['teamAList']" (cdkDropListDropped)="dropped($event)" class="players-row team-players" aria-label="Khu vực Đội Cam">
+                @if (!teamB.length) {
+                  <div class="placeholder">Kéo cầu thủ vào đây</div>
+                }
+                @for (player of teamB; track player.id) {
+                  <div cdkDrag class="player-card team-member" [attr.aria-label]="player.firstName">
+                    <div class="drag-handle" cdkDragHandle title="Kéo để chuyển đội" aria-label="Kéo để chuyển đội">⋮⋮</div>
+                    <img [src]="player.avatar || 'assets/images/default-avatar.svg'" (error)="onAvatarError($event)" class="player-avatar" [alt]="player.firstName" [title]="'Avatar: ' + (player.avatar || 'NO AVATAR')" loading="lazy" />
+                    <span class="player-name">{{player.firstName}}</span>
+                    <span style="font-size: 0.7rem; color: #666; font-weight: 600;">{{getPlayerAge(player)}} tuổi</span>
+                  </div>
+                }
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  `,
+    }
+    `,
   styles: [`
     .team-header { display:flex; align-items:center; justify-content:space-between; padding:8px 12px; border-radius:12px 12px 0 0; }
   .team-header.team-a { background:linear-gradient(90deg,#06b2ff,#00e5ff); color:#064065; }

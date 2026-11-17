@@ -6,7 +6,7 @@ import { PermissionService } from '../../core/services/permission.service';
 class MockPermissionService {
   private state = { canEdit: false, role: '', loggedIn: false };
   private listeners: ((v:boolean)=>void)[] = [];
-  canEditChanges(){ return { subscribe: (fn:(v:boolean)=>void) => { this.listeners.push(fn); fn(this.state.canEdit); return { unsubscribe(){} }; } }; }
+  canEditChanges(){ return { subscribe: (fn:(v:boolean)=>void) => { this.listeners.push(fn); fn(this.state.canEdit); return { unsubscribe: () => undefined }; } }; }
   getCurrent(){ return this.state; }
   set(can: boolean){ this.state.canEdit = can; this.listeners.forEach(l=>l(can)); }
 }

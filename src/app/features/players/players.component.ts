@@ -1,10 +1,10 @@
-﻿import { Component, ChangeDetectionStrategy, ChangeDetectorRef, Input, OnInit, OnDestroy, TrackByFunction, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, Input, OnInit, OnDestroy, TrackByFunction, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, Subscription } from 'rxjs';
 import { AIWorkerService } from './services/ai-worker.service';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
-import { Player, dividePlayersByPosition, dividePlayersByPositionWithAgeBalance } from './player-utils'; 
+import { Player, dividePlayersByPositionWithAgeBalance } from './player-utils'; 
 import { PlayerInfo } from '../../core/models/player.model';
 import { TeamComposition, TeamColor, MatchStatus, MatchInfo, MatchResult, MatchFinances, ExpenseBreakdown, RevenueBreakdown, MatchStatistics, GoalType, CardType, MatchEvent, EventType } from '../../core/models/match.model';
 import type { AIAnalysisResult } from './services/ai-analysis.service';

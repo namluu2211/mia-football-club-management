@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { DataStoreService } from '../../core/services/data-store.service';
 import { Player } from '../players/player-utils';
 import { FirebaseService } from '../../services/firebase.service';
@@ -18,47 +18,58 @@ interface AnalysisResult {
 @Component({
   selector:'app-analysis',
   standalone:true,
-  imports:[CommonModule],
+  imports: [],
   template:`
-  <div class="analysis-container" *ngIf="teamA.length || teamB.length; else noTeams">
-    <h2 class="page-title"><i class="fas fa-brain me-2"></i>🔬 Phân Tích Đội Hình</h2>
-    <p class="text-muted mb-3">Phân tách logic AI khỏi trang chia đội để giảm kích thước bundle ban đầu.</p>
-    <div class="teams-preview mb-3">
-      <div class="team-box xanh">
-        <h5>🟦 Đội Xanh ({{teamA.length}})</h5>
-  <div class="players">{{ formatNames(teamA) }}</div>
+  @if (teamA.length || teamB.length) {
+    <div class="analysis-container">
+      <h2 class="page-title"><i class="fas fa-brain me-2"></i>🔬 Phân Tích Đội Hình</h2>
+      <p class="text-muted mb-3">Phân tách logic AI khỏi trang chia đội để giảm kích thước bundle ban đầu.</p>
+      <div class="teams-preview mb-3">
+        <div class="team-box xanh">
+          <h5>🟦 Đội Xanh ({{teamA.length}})</h5>
+          <div class="players">{{ formatNames(teamA) }}</div>
+        </div>
+        <div class="team-box cam">
+          <h5>🟧 Đội Cam ({{teamB.length}})</h5>
+          <div class="players">{{ formatNames(teamB) }}</div>
+        </div>
       </div>
-      <div class="team-box cam">
-        <h5>🟧 Đội Cam ({{teamB.length}})</h5>
-  <div class="players">{{ formatNames(teamB) }}</div>
-      </div>
+      <!-- Manual AI button removed -->
+      @if (result) {
+        <div class="result-card mt-4">
+          <h4>Kết quả dự đoán: {{result.predictedScore.xanh}} - {{result.predictedScore.cam}}</h4>
+          <p>Tỷ lệ thắng: 🟦 {{result.xanhWinProb}}% | 🟧 {{result.camWinProb}}%</p>
+          @if (result.teamStrengths) {
+            <div class="strengths mb-3">
+              <strong>Sức mạnh trung bình:</strong>
+              🟦 {{result.teamStrengths.teamA}} | 🟧 {{result.teamStrengths.teamB}} | Cân bằng: {{result.teamStrengths.balanceScore}}%
+            </div>
+          }
+          @if (result.keyFactors?.length) {
+            <div>
+              <h5>Yếu tố chính</h5>
+              <ul>
+                @for (f of result.keyFactors; track f) {
+                  <li>{{f.name}}: {{f.impact > 0 ? '+' : ''}}{{f.impact}}%</li>
+                }
+              </ul>
+            </div>
+          }
+          @if (result.historicalStats) {
+            <div>
+              <h5>Lịch sử gần đây ({{result.historicalStats.totalMatches}} trận)</h5>
+              <p>🟦 {{result.historicalStats.xanhWins}} thắng | 🟧 {{result.historicalStats.camWins}} thắng | 🤝 {{result.historicalStats.draws}} hòa</p>
+            </div>
+          }
+        </div>
+      }
     </div>
-    <!-- Manual AI button removed -->
-    <div class="result-card mt-4" *ngIf="result">
-      <h4>Kết quả dự đoán: {{result.predictedScore.xanh}} - {{result.predictedScore.cam}}</h4>
-      <p>Tỷ lệ thắng: 🟦 {{result.xanhWinProb}}% | 🟧 {{result.camWinProb}}%</p>
-      <div *ngIf="result.teamStrengths" class="strengths mb-3">
-        <strong>Sức mạnh trung bình:</strong>
-        🟦 {{result.teamStrengths.teamA}} | 🟧 {{result.teamStrengths.teamB}} | Cân bằng: {{result.teamStrengths.balanceScore}}%
-      </div>
-      <div *ngIf="result.keyFactors?.length">
-        <h5>Yếu tố chính</h5>
-        <ul>
-          <li *ngFor="let f of result.keyFactors">{{f.name}}: {{f.impact > 0 ? '+' : ''}}{{f.impact}}%</li>
-        </ul>
-      </div>
-      <div *ngIf="result.historicalStats">
-        <h5>Lịch sử gần đây ({{result.historicalStats.totalMatches}} trận)</h5>
-        <p>🟦 {{result.historicalStats.xanhWins}} thắng | 🟧 {{result.historicalStats.camWins}} thắng | 🤝 {{result.historicalStats.draws}} hòa</p>
-      </div>
-    </div>
-  </div>
-  <ng-template #noTeams>
+  } @else {
     <div class="empty-state">
       <h3>Chưa có đội hình</h3>
       <p>Quay lại trang Chia Đội để chọn và xuất sang phân tích.</p>
     </div>
-  </ng-template>
+  }
   `,
   styles:[`
     .analysis-container{max-width:960px;margin:0 auto;padding:1rem;}

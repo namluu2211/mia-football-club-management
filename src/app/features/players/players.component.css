@@ -429,7 +429,7 @@ app-player-list .pagination-controls {
 
 .events-grid { 
    display:grid; 
-   grid-template-columns:repeat(auto-fit, minmax(340px, 1fr)); 
+   grid-template-columns:repeat(auto-fit, minmax(min(100%, 340px), 1fr)); 
    gap:20px;
 }
 
@@ -694,7 +694,7 @@ app-player-list .pagination-controls {
 
 .finance-grid { 
    display:grid; 
-   grid-template-columns:repeat(auto-fit, minmax(340px, 1fr)); 
+   grid-template-columns:repeat(auto-fit, minmax(min(100%, 340px), 1fr)); 
    gap:24px;
 }
 
@@ -1171,3 +1171,29 @@ app-teams-panel .delete-btn:hover {
    animation: fadeInUp 1s ease 0.5s both;
 }
 
+/* ===== Mobile layout (<= 560px) ===== */
+@media (max-width:560px){
+   .modern-container { padding:8px 8px 32px; min-height:0; }
+   /* A multi-row sticky toolbar would cover a third of the screen; let it scroll with the page */
+   .players-toolbar { position:static; padding:10px; gap:8px; margin:0 0 12px; border-radius:14px; }
+   .players-toolbar .toolbar-left,
+   .players-toolbar .toolbar-right { flex:1 1 100%; flex-wrap:wrap; gap:8px; }
+   .players-toolbar .toolbar-center { flex:1 1 100%; order:0; }
+   .players-toolbar .mode-indicator { font-size:12px; padding:6px 12px; }
+   .players-toolbar .tl-btn { min-height:44px; padding:8px 10px; font-size:13px; justify-content:center; text-align:center; white-space:normal; line-height:1.15; }
+   /* left group: [mode] [filter] [clear] */
+   .players-toolbar .toolbar-left .tl-btn:first-child { flex:1 1 auto; }
+   .players-toolbar .toolbar-left .tl-btn:not(:first-child) { flex:0 0 44px; padding:8px 0; }
+   /* right group: two wide text buttons on row 1, then icon-style actions share row 2 */
+   .players-toolbar .toolbar-right .tl-btn:nth-child(-n+2) { flex:1 1 calc(50% - 4px); }
+   .players-toolbar .toolbar-right .tl-btn:nth-child(n+3) { flex:1 1 0; min-width:0; }
+   .players-list-wrapper { margin-bottom:16px; border-radius:16px; }
+   .players-list-header { padding:12px 14px; }
+   .players-list-content { padding:6px 8px 12px; }
+   .players-list-title { font-size:16px; }
+   .collapse-toggle { min-width:44px; min-height:44px; }
+}
+@media (max-width:560px){
+   .finance-grid { gap:14px; }
+   .finance-card { padding:16px 14px 14px; border-radius:16px; }
+}

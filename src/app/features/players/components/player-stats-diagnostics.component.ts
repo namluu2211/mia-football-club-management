@@ -29,37 +29,58 @@ interface PlayerDiagnosticsRow {
       </label>
       <input placeholder="Lọc tên" [(ngModel)]="filter" />
     </div>
-    <table class="diag-table" *ngIf="rows.length; else empty">
-      <thead>
-        <tr>
-          <th>Cầu thủ</th>
-          <th>Trận</th>
-          <th>Bàn</th>
-          <th>KT</th>
-          <th>Vàng</th>
-          <th>Đỏ</th>
-          <th *ngIf="showSources">Nguồn</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let r of rows | slice:0:500" [class.highlight-discrepancy]="isDiscrepancy(r)">
-          <td>{{ r.playerName }}</td>
-          <td>{{ r.matches }}</td>
-          <td>{{ r.goals }}</td>
-          <td>{{ r.assists }}</td>
-          <td>{{ r.yellows }}</td>
-          <td>{{ r.reds }}</td>
-          <td *ngIf="showSources">
-            <div class="sources">
-              <div class="src-group" *ngIf="r.goalSources.length"><strong>Bàn:</strong> <span *ngFor="let s of r.goalSources">{{s.matchId}} ({{s.minute||'?'}}')</span></div>
-              <div class="src-group" *ngIf="r.assistSources.length"><strong>KT:</strong> <span *ngFor="let s of r.assistSources">{{s.matchId}} ({{s.minute||'?'}}')</span></div>
-              <div class="src-group" *ngIf="r.cardSources.length"><strong>Thẻ:</strong> <span *ngFor="let c of r.cardSources">{{c.matchIdRef}} {{c.type}} ({{c.minute||'?'}}')</span></div>
+    @if (rows.length) {
+      <table class="diag-table">
+        <thead>
+          <tr>
+            <th>Cầu thủ</th>
+            <th>Trận</th>
+            <th>Bàn</th>
+            <th>KT</th>
+            <th>Vàng</th>
+            <th>Đỏ</th>
+            @if (showSources) {
+              <th>Nguồn</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of rows | slice:0:500; track r) {
+            <tr [class.highlight-discrepancy]="isDiscrepancy(r)">
+              <td>{{ r.playerName }}</td>
+              <td>{{ r.matches }}</td>
+              <td>{{ r.goals }}</td>
+              <td>{{ r.assists }}</td>
+              <td>{{ r.yellows }}</td>
+              <td>{{ r.reds }}</td>
+              @if (showSources) {
+                <td>
+                  <div class="sources">
+                    @if (r.goalSources.length) {
+                      <div class="src-group"><strong>Bàn:</strong> @for (s of r.goalSources; track s) {
+                      <span>{{s.matchId}} ({{s.minute||'?'}}')</span>
+                    }</div>
+                  }
+                  @if (r.assistSources.length) {
+                    <div class="src-group"><strong>KT:</strong> @for (s of r.assistSources; track s) {
+                    <span>{{s.matchId}} ({{s.minute||'?'}}')</span>
+                  }</div>
+                }
+                @if (r.cardSources.length) {
+                  <div class="src-group"><strong>Thẻ:</strong> @for (c of r.cardSources; track c) {
+                  <span>{{c.matchIdRef}} {{c.type}} ({{c.minute||'?'}}')</span>
+                }</div>
+              }
             </div>
           </td>
-        </tr>
-      </tbody>
-    </table>
-    <ng-template #empty><div class="empty">Không có dữ liệu trận đấu</div></ng-template>
+        }
+      </tr>
+    }
+  </tbody>
+  </table>
+  } @else {
+    <div class="empty">Không có dữ liệu trận đấu</div>
+  }
   </div>
   `,
   styles: [`

@@ -1,34 +1,40 @@
 import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { DragDropModule, CdkDragDrop, transferArrayItem } from '@angular/cdk/drag-drop';
 import { Player } from '../player-utils';
 
 @Component({
   selector: 'app-team-dnd',
   standalone: true,
-  imports: [CommonModule, DragDropModule],
+  imports: [DragDropModule],
   template: `
   <div class="team-dnd-wrapper">
-    <div class="teams" *ngIf="teamA && teamB">
-      <div class="team-column">
-        <h3>Đội Xanh ({{teamA.length}})</h3>
-        <div cdkDropList [cdkDropListData]="teamA" class="player-drop-zone" (cdkDropListDropped)="onDrop($event)">
-          <div class="player-item" *ngFor="let p of teamA" cdkDrag>
-            <span>{{p.firstName}} {{p.lastName}}</span>
-            <button type="button" class="remove-btn" (click)="removePlayer.emit({player:p, team:'A'})">×</button>
+    @if (teamA && teamB) {
+      <div class="teams">
+        <div class="team-column">
+          <h3>Đội Xanh ({{teamA.length}})</h3>
+          <div cdkDropList [cdkDropListData]="teamA" class="player-drop-zone" (cdkDropListDropped)="onDrop($event)">
+            @for (p of teamA; track p) {
+              <div class="player-item" cdkDrag>
+                <span>{{p.firstName}} {{p.lastName}}</span>
+                <button type="button" class="remove-btn" (click)="removePlayer.emit({player:p, team:'A'})">×</button>
+              </div>
+            }
+          </div>
+        </div>
+        <div class="team-column">
+          <h3>Đội Cam ({{teamB.length}})</h3>
+          <div cdkDropList [cdkDropListData]="teamB" class="player-drop-zone" (cdkDropListDropped)="onDrop($event)">
+            @for (p of teamB; track p) {
+              <div class="player-item" cdkDrag>
+                <span>{{p.firstName}} {{p.lastName}}</span>
+                <button type="button" class="remove-btn" (click)="removePlayer.emit({player:p, team:'B'})">×</button>
+              </div>
+            }
           </div>
         </div>
       </div>
-      <div class="team-column">
-        <h3>Đội Cam ({{teamB.length}})</h3>
-        <div cdkDropList [cdkDropListData]="teamB" class="player-drop-zone" (cdkDropListDropped)="onDrop($event)">
-          <div class="player-item" *ngFor="let p of teamB" cdkDrag>
-            <span>{{p.firstName}} {{p.lastName}}</span>
-            <button type="button" class="remove-btn" (click)="removePlayer.emit({player:p, team:'B'})">×</button>
-          </div>
-        </div>
-      </div>
-    </div>
+    }
   </div>
   `,
   styles: [`

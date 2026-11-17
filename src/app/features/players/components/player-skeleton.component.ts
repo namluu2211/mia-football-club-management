@@ -1,19 +1,21 @@
 import { Component, ChangeDetectionStrategy, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 @Component({
   selector: 'app-player-skeleton',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     <div class="skeleton-grid" [style.--cols]="cols">
-      <div class="skeleton-card" *ngFor="let i of skeletonItems">
-        <div class="skeleton-avatar shimmer"></div>
-        <div class="skeleton-line shimmer" style="width:70%"></div>
-        <div class="skeleton-line shimmer" style="width:50%"></div>
-      </div>
+      @for (i of skeletonItems; track i) {
+        <div class="skeleton-card">
+          <div class="skeleton-avatar shimmer"></div>
+          <div class="skeleton-line shimmer" style="width:70%"></div>
+          <div class="skeleton-line shimmer" style="width:50%"></div>
+        </div>
+      }
     </div>
-  `,
+    `,
   styles: [`
     :host { display:block; }
     .skeleton-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; }

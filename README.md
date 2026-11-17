@@ -586,3 +586,29 @@ For support and questions:
 ---
 
 **Thăng Long FC** - Empowering local football clubs with professional-grade management tools! ⚽🏆
+
+## 🛠️ Development workflow
+
+| Task | Command |
+|---|---|
+| Run tests | `npm test` |
+| Lint | `npm run lint` |
+| Production build | `npm run build` |
+| Regenerate Firebase rules | `npm run firebase:rules` |
+| Check rules are up to date | `npm run firebase:rules:check` |
+| Deploy rules (database + storage) | `npm run deploy:rules` |
+
+CI (`.github/workflows/build-deploy.yml`) runs `npm ci`, lint, build and tests. A failing test or lint error fails the build.
+
+### Admins and security rules
+- The admin list lives in `src/app/config/admin-users.json`. It drives the UI **and** the generated Firebase rules.
+- After changing it, run `npm run firebase:rules` and commit `database.rules.json` and `storage.rules`, then `npm run deploy:rules`.
+- Client-side role checks only hide controls. Real write protection is enforced by those rules (public read, admin-only write).
+- A unit test fails if the committed rules drift from the admin list or miss a database node the app uses.
+
+### Performance notes
+- `firebase/database` and `firebase/auth` are loaded on demand, not in the initial bundle. Do not add static imports of them in code that loads at startup.
+- The AI worker is created through `ai-worker.factory.ts` (`new URL(..., import.meta.url)`), which the Angular builder needs to bundle it.
+
+### Exports
+- History page: **Xuất dữ liệu** (JSON) and **Xuất CSV** (UTF-8 with BOM, opens correctly in Excel; formula-like text is neutralised).

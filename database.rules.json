@@ -1,0 +1,29 @@
+{
+  "rules": {
+    ".read": true,
+    "history": {
+      ".write": "auth != null && (auth.token.email.toLowerCase() == 'bktientu@gmail.com' || auth.token.email.toLowerCase() == 'nguyenthuysy@gmail.com' || auth.token.email.toLowerCase() == 'hanguyen@thanglongfc.com' || auth.token.email.toLowerCase() == 'hieutran@thanglongfc.com')"
+    },
+    "players": {
+      ".write": "auth != null && (auth.token.email.toLowerCase() == 'bktientu@gmail.com' || auth.token.email.toLowerCase() == 'nguyenthuysy@gmail.com' || auth.token.email.toLowerCase() == 'hanguyen@thanglongfc.com' || auth.token.email.toLowerCase() == 'hieutran@thanglongfc.com')"
+    },
+    "playerAvatars": {
+      ".write": "auth != null && (auth.token.email.toLowerCase() == 'bktientu@gmail.com' || auth.token.email.toLowerCase() == 'nguyenthuysy@gmail.com' || auth.token.email.toLowerCase() == 'hanguyen@thanglongfc.com' || auth.token.email.toLowerCase() == 'hieutran@thanglongfc.com')"
+    },
+    "playerMedia": {
+      ".write": "auth != null && (auth.token.email.toLowerCase() == 'bktientu@gmail.com' || auth.token.email.toLowerCase() == 'nguyenthuysy@gmail.com' || auth.token.email.toLowerCase() == 'hanguyen@thanglongfc.com' || auth.token.email.toLowerCase() == 'hieutran@thanglongfc.com')"
+    },
+    "matchResults": {
+      ".write": "auth != null && (auth.token.email.toLowerCase() == 'bktientu@gmail.com' || auth.token.email.toLowerCase() == 'nguyenthuysy@gmail.com' || auth.token.email.toLowerCase() == 'hanguyen@thanglongfc.com' || auth.token.email.toLowerCase() == 'hieutran@thanglongfc.com')"
+    },
+    "playerStats": {
+      ".write": "auth != null && (auth.token.email.toLowerCase() == 'bktientu@gmail.com' || auth.token.email.toLowerCase() == 'nguyenthuysy@gmail.com' || auth.token.email.toLowerCase() == 'hanguyen@thanglongfc.com' || auth.token.email.toLowerCase() == 'hieutran@thanglongfc.com')"
+    },
+    "fundTransactions": {
+      ".write": "auth != null && (auth.token.email.toLowerCase() == 'bktientu@gmail.com' || auth.token.email.toLowerCase() == 'nguyenthuysy@gmail.com' || auth.token.email.toLowerCase() == 'hanguyen@thanglongfc.com' || auth.token.email.toLowerCase() == 'hieutran@thanglongfc.com')"
+    },
+    "statistics": {
+      ".write": "auth != null && (auth.token.email.toLowerCase() == 'bktientu@gmail.com' || auth.token.email.toLowerCase() == 'nguyenthuysy@gmail.com' || auth.token.email.toLowerCase() == 'hanguyen@thanglongfc.com' || auth.token.email.toLowerCase() == 'hieutran@thanglongfc.com')"
+    }
+  }
+}

@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { AvatarFallbackDirective } from '../directives/avatar-fallback.directive';
 import { PlayerSkeletonComponent } from './player-skeleton.component';
 import { FormsModule } from '@angular/forms';
@@ -8,66 +8,78 @@ import { Player } from '../player-utils';
 @Component({
   selector: 'app-player-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, AvatarFallbackDirective, PlayerSkeletonComponent],
+  imports: [FormsModule, AvatarFallbackDirective, PlayerSkeletonComponent],
   template: `
   <div class="player-list-section">
-    <div class="player-list-card light" *ngIf="showPlayerList; else collapsedTemplate">
-      <div class="list-header">
-        <h3><i class="fas fa-users me-2"></i>Danh sách cầu thủ</h3>
-        <div class="list-controls">
-          <button type="button" class="collapse-btn" (click)="toggleList.emit()" [attr.aria-expanded]="showPlayerList" title="Thu gọn danh sách">
-            <i class="fas fa-chevron-up"></i>
-          </button>
-        </div>
-      </div>
-      <app-player-skeleton *ngIf="loading && paginatedPlayers.length === 0"></app-player-skeleton>
-      <div class="legend-row" *ngIf="paginatedPlayers.length && registeredPlayers.length">
-        <span class="legend-item"><span class="legend-dot reg"></span> Đã đăng ký</span>
-        <span class="legend-item"><span class="legend-dot unreg"></span> Chưa đăng ký</span>
-      </div>
-      <div class="players-grid4" *ngIf="paginatedPlayers.length > 0 && !loading; else noPlayersTemplate" aria-label="Danh sách cầu thủ phân trang">
-        <div *ngFor="let player of paginatedPlayers; trackBy: trackByPlayerId" class="player-cell" [class.registered]="isRegistered(player)" [attr.aria-label]="player.firstName + (isRegistered(player)? ' đã đăng ký':' chưa đăng ký')">
-          <div class="top-row">
-            <div class="avatar-small" (click)="viewPlayer.emit(player)" tabindex="0" (keyup)="onPlayerInfoKey($event, player)">
-              <img appAvatarFallback [fallbackSrc]="'assets/images/default-avatar.svg'" [src]="player.avatar || 'assets/images/default-avatar.svg'" [alt]="player.firstName" loading="lazy">
-            </div>
-            <!-- Allow viewers to mark registered for team shuffle; keep styling identical -->
-            <button class="register-toggle" (click)="toggleRegistration.emit(player)" [attr.aria-pressed]="isRegistered(player)" [title]="isRegistered(player)?'Hủy đăng ký':'Đăng ký'">
-              <i class="fas" [class.fa-circle-plus]="!isRegistered(player)" [class.fa-circle-check]="isRegistered(player)"></i>
+    @if (showPlayerList) {
+      <div class="player-list-card light">
+        <div class="list-header">
+          <h3><i class="fas fa-users me-2"></i>Danh sách cầu thủ</h3>
+          <div class="list-controls">
+            <button type="button" class="collapse-btn" (click)="toggleList.emit()" [attr.aria-expanded]="showPlayerList" title="Thu gọn danh sách">
+              <i class="fas fa-chevron-up"></i>
             </button>
           </div>
-          <div class="info">
-            <div class="name" [title]="player.firstName + ' ' + player.lastName">{{ player.firstName }} {{ player.lastName }}</div>
-            <div class="position">{{ player.position }}</div>
-            <div class="reg-badge" *ngIf="isRegistered(player)" aria-label="Đã đăng ký">Đăng ký</div>
+        </div>
+        @if (loading && paginatedPlayers.length === 0) {
+          <app-player-skeleton></app-player-skeleton>
+        }
+        @if (paginatedPlayers.length && registeredPlayers.length) {
+          <div class="legend-row">
+            <span class="legend-item"><span class="legend-dot reg"></span> Đã đăng ký</span>
+            <span class="legend-item"><span class="legend-dot unreg"></span> Chưa đăng ký</span>
           </div>
-        </div>
+        }
+        @if (paginatedPlayers.length > 0 && !loading) {
+          <div class="players-grid4" aria-label="Danh sách cầu thủ phân trang">
+            @for (player of paginatedPlayers; track trackByPlayerId($index, player)) {
+              <div class="player-cell" [class.registered]="isRegistered(player)" [attr.aria-label]="player.firstName + (isRegistered(player)? ' đã đăng ký':' chưa đăng ký')">
+                <div class="top-row">
+                  <div class="avatar-small" (click)="viewPlayer.emit(player)" tabindex="0" (keyup)="onPlayerInfoKey($event, player)">
+                    <img appAvatarFallback [fallbackSrc]="'assets/images/default-avatar.svg'" [src]="player.avatar || 'assets/images/default-avatar.svg'" [alt]="player.firstName" loading="lazy">
+                  </div>
+                  <!-- Allow viewers to mark registered for team shuffle; keep styling identical -->
+                  <button class="register-toggle" (click)="toggleRegistration.emit(player)" [attr.aria-pressed]="isRegistered(player)" [title]="isRegistered(player)?'Hủy đăng ký':'Đăng ký'">
+                    <i class="fas" [class.fa-circle-plus]="!isRegistered(player)" [class.fa-circle-check]="isRegistered(player)"></i>
+                  </button>
+                </div>
+                <div class="info">
+                  <div class="name" [title]="player.firstName + ' ' + player.lastName">{{ player.firstName }} {{ player.lastName }}</div>
+                  <div class="position">{{ player.position }}</div>
+                  @if (isRegistered(player)) {
+                    <div class="reg-badge" aria-label="Đã đăng ký">Đăng ký</div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="empty">
+            <i class="fas fa-exclamation-triangle icon"></i>
+            <h4>Không có dữ liệu cầu thủ</h4>
+            <p>Đang tải hoặc có lỗi khi tải danh sách cầu thủ.</p>
+            <button class="modern-btn btn-primary" (click)="reload.emit()">Thử tải lại</button>
+          </div>
+        }
+        @if (totalPages > 1) {
+          <div class="pagination-controls">
+            <button class="btn btn-sm btn-outline-primary" [disabled]="currentPage === 0" (click)="previousPage.emit()" title="Trang trước">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <span class="pagination-info mx-3">Trang {{ currentPage + 1 }} / {{ totalPages }}</span>
+            <button class="btn btn-sm btn-outline-primary" [disabled]="currentPage >= totalPages - 1" (click)="nextPage.emit()" title="Trang sau">
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        }
       </div>
-      <div class="pagination-controls" *ngIf="totalPages > 1">
-        <button class="btn btn-sm btn-outline-primary" [disabled]="currentPage === 0" (click)="previousPage.emit()" title="Trang trước">
-          <i class="fas fa-chevron-left"></i>
-        </button>
-        <span class="pagination-info mx-3">Trang {{ currentPage + 1 }} / {{ totalPages }}</span>
-        <button class="btn btn-sm btn-outline-primary" [disabled]="currentPage >= totalPages - 1" (click)="nextPage.emit()" title="Trang sau">
-          <i class="fas fa-chevron-right"></i>
-        </button>
-      </div>
-      <ng-template #noPlayersTemplate>
-        <div class="empty">
-          <i class="fas fa-exclamation-triangle icon"></i>
-          <h4>Không có dữ liệu cầu thủ</h4>
-          <p>Đang tải hoặc có lỗi khi tải danh sách cầu thủ.</p>
-          <button class="modern-btn btn-primary" (click)="reload.emit()">Thử tải lại</button>
-        </div>
-      </ng-template>
-    </div>
-    <ng-template #collapsedTemplate>
+    } @else {
       <div class="collapsed-bar" aria-label="Danh sách cầu thủ đã thu gọn">
         <button type="button" class="expand-btn" (click)="toggleList.emit()" [attr.aria-expanded]="showPlayerList" title="Mở rộng danh sách">
           <i class="fas fa-chevron-down"></i> Hiện danh sách cầu thủ
         </button>
       </div>
-    </ng-template>
+    }
   </div>
   `,
   styles: [`
@@ -107,7 +119,21 @@ import { Player } from '../player-utils';
     .empty .icon { font-size:2.4rem; margin-bottom:12px; opacity:.65; }
   @media (max-width:900px){ .players-grid4 { grid-template-columns:repeat(3,1fr); } }
   @media (max-width:680px){ .players-grid4 { grid-template-columns:repeat(2,1fr); } }
-  @media (max-width:460px){ .players-grid4 { grid-template-columns:1fr; } }
+  @media (max-width:460px){
+    .player-list-section { padding:6px 0 4px; }
+    .player-list-card.light { padding:10px 8px 8px; }
+    /* the page already shows a "Danh sách cầu thủ" heading with its own collapse button */
+    .list-header { display:none; }
+    .players-grid4 { gap:8px; }
+    .player-cell { padding:8px 8px 8px; }
+    .register-toggle { width:36px; height:36px; font-size:16px; }
+    .name { font-size:.85rem; }
+    .position { font-size:.68rem; }
+    .reg-badge { font-size:.62rem; padding:2px 8px; align-self:flex-start; }
+    .legend-row { font-size:.7rem; }
+    .pagination-controls .btn { min-width:44px; min-height:44px; }
+  }
+  @media (max-width:330px){ .players-grid4 { grid-template-columns:1fr; } }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
